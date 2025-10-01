@@ -5,6 +5,8 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import BookCard from '../../components/books/BookCard/BookCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
+import { ReviewsProvider } from '../../contexts/ReviewsContext';
+import ReviewsSection from '../../components/reviews/ReviewsSection/ReviewsSection';
 import './BookDetailPage.css';
 
 const BookDetailPage = () => {
@@ -105,6 +107,10 @@ const BookDetailPage = () => {
             <Link to="/books" className="btn btn-primary">
               Back to Catalog
             </Link>
+            {/* review section */}
+            <ReviewsProvider>
+              <ReviewsSection bookId={id} />
+            </ReviewsProvider>
           </div>
         </div>
       </div>

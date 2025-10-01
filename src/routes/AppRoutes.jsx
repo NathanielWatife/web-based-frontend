@@ -4,6 +4,8 @@ import PublicRoutes from './PublicRoutes';
 import PrivateRoutes from './PrivateRoutes';
 import AdminRoutes from './AdminRoutes';
 import OrderConfirmation from '../pages/Checkout/OrderConfirmation';
+import Wishlist from '../pages/User/Wishlist';
+import MyReviews from '../pages/User/MyReviews';
 
 // Pages
 import Home from '../pages/Home/Home';
@@ -41,6 +43,8 @@ const AppRoutes = () => {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/orders" element={<OrderHistory />} />
                         <Route path="/order-confirmation" element={<OrderConfirmation />} />
+                        <Route path="/wishlist" element={<Wishlist />} />
+                        <Route path="/my-reviews" element={<MyReviews />} />
                     </Route>
                     {/* Admin Routes */}
                     <Route element={<AdminRoutes />}>

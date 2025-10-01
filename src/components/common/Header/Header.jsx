@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCart } from '../../../contexts/CartContext';
+import { useWishlist } from "../../../contexts/WishlistContext";
 import './Header.css';
 
 
@@ -9,6 +10,8 @@ const Header = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const { getCartItemsCount } = useCart();
     const navigate = useNavigate();
+
+    const  { wishlistCount } = useWishlist();
 
     const handleLogout = () => {
         logout();
@@ -33,6 +36,9 @@ const Header = () => {
                                 </Link>
                                 <Link to="/cart" className="nav-link cart-link">
                                     🛒 Cart ({getCartItemsCount()})
+                                </Link>
+                                <Link to="/wishlist" className="nav-link wishlist-link">
+                                    ❤️ Wishlist ({wishlistCount})
                                 </Link>
                                 <div className="user-name">
                                     <span>Hello, {user?.first_name}</span>

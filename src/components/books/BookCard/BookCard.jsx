@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../../contexts/CartContext';
 import './BookCard.css';
+import WishlistButton from '../WishlistButton/WishlistButton';
 
 const BookCard = ({ book }) => {
   const { addToCart } = useCart();
@@ -30,6 +31,7 @@ const BookCard = ({ book }) => {
     <div className="book-card">
       <Link to={`/books/${book.id}`} className="book-card-link">
         <div className="book-image">
+          <WishlistButton book={book} size="small" />
           {book.cover_image ? (
             <img src={book.cover_image} alt={book.title} />
           ) : (

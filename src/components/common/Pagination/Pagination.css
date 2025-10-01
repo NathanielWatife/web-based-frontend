@@ -1,0 +1,124 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 1rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  padding: 0.75rem 1.25rem;
+  border: 2px solid var(--border-color);
+  background: var(--white);
+  color: var(--text-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(.disabled):not(.active) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--background-light);
+}
+
+.pagination-btn.prev,
+.pagination-btn.next {
+  min-width: 100px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pagination-ellipsis {
+  padding: 0.75rem 0.5rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.page-info {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    min-width: 40px;
+  }
+  
+  .pagination-btn.prev,
+  .pagination-btn.next {
+    min-width: 80px;
+    font-size: 0.8rem;
+  }
+  
+  .page-numbers {
+    gap: 0.25rem;
+  }
+  
+  .page-info {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+    order: -1;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .page-numbers {
+    order: 2;
+  }
+  
+  .pagination-btn.prev,
+  .pagination-btn.next {
+    order: 1;
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .page-info {
+    order: 0;
+    margin-bottom: 0;
+  }
+}
