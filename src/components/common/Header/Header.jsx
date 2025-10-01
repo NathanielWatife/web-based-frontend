@@ -31,6 +31,9 @@ const Header = () => {
                                 <Link to="/cart" className="nav-link cart-link">
                                     Cart ({getCartItemsCount()})
                                 </Link>
+                                <Link to="/cart" className="nav-link cart-link">
+                                    🛒 Cart ({getCartItemsCount()})
+                                </Link>
                                 <div className="user-name">
                                     <span>Hello, {user?.first_name}</span>
                                     <div className="dropdown">

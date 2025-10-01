@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import PublicRoutes from './PublicRoutes';
 import PrivateRoutes from './PrivateRoutes';
 import AdminRoutes from './AdminRoutes';
+import OrderConfirmation from '../pages/Checkout/OrderConfirmation';
 
 // Pages
 import Home from '../pages/Home/Home';
@@ -39,6 +40,7 @@ const AppRoutes = () => {
                         <Route path="/checkout" element={<CheckoutPage />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/orders" element={<OrderHistory />} />
+                        <Route path="/order-confirmation" element={<OrderConfirmation />} />
                     </Route>
                     {/* Admin Routes */}
                     <Route element={<AdminRoutes />}>
