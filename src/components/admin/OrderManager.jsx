@@ -3,6 +3,7 @@ import { useApi } from '../../hooks/useApi';
 import { ordersAPI } from '../../services/orders';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import LoadingSpinner from '../shared/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const OrderManager = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
