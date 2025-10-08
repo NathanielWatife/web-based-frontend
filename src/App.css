@@ -1,62 +1,43 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Custom component styles can be added here */
+.App {
+  text-align: left;
 }
 
-:root {
-  --primary-color: #2c5530;
-  --secondary-color: #4a7c59;
-  --accent-color: #8fb996;
-  --text-dark: #333333;
-  --text-light: #666666;
-  --background-light: #f8f9fa;
-  --white: #ffffff;
-  --border-color: #e0e0e0;
-  --error-color: #dc3545;
-  --success-color: #28a745;
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  color: var(--text-dark);
-  background-color: var(--background-light);
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Line clamp utility for text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.btn-primary {
-  background-color: var(--primary-color);
-  color: var(--white);
+/* Custom focus styles */
+.focus-ring:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
-.btn-primary:hover {
-  background-color: var(--secondary-color);
-}
-
-.btn-secondary {
-  background-color: var(--accent-color);
-  color: var(--white);
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }

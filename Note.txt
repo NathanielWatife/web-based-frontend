@@ -1,0 +1,2 @@
+# need to install
+npm install react-paystack flutterwave-react-v3
