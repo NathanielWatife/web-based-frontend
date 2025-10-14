@@ -1,141 +1,116 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
-import { booksAPI } from '../services/books';
-import BookGrid from '../components/books/BookGrid';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container,
+  Grid,
+  Box,
+  Typography,
+  debounce
+} from '@mui/material';
+import BookList from '../components/books/BookList';
 import BookSearch from '../components/books/BookSearch';
 import BookFilters from '../components/books/BookFilters';
-import Pagination from '../components/shared/Pagination';
+import { bookService } from '../services/bookService';
 
 const BookCatalog = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    category: searchParams.get('category') || '',
-    department: searchParams.get('department') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    inStock: searchParams.get('inStock') === 'true',
-    page: parseInt(searchParams.get('page')) || 1
-  });
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 20000]);
+  const [sortBy, setSortBy] = useState('title');
+  const [categories, setCategories] = useState([]);
 
-  // Fetch books with current filters
-  const { data: booksData, loading, error, refetch } = useApi(
-    () => booksAPI.getAllBooks(filters),
-    null,
-    [filters]
+  // Fetch books with debounced search
+  const fetchBooks = useCallback(
+    debounce(async (search, category, price, sort) => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const params = {};
+        if (search) params.search = search;
+        if (category) params.category = category;
+        if (price[0] > 0) params.minPrice = price[0];
+        if (price[1] < 20000) params.maxPrice = price[1];
+        if (sort) params.sort = sort;
+
+        const response = await bookService.getAllBooks(params);
+        setBooks(response.books || response);
+        
+        // Extract unique categories from books
+        if (response.books) {
+          const uniqueCategories = [...new Set(response.books.map(book => book.category))];
+          setCategories(uniqueCategories);
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch books');
+      } finally {
+        setLoading(false);
+      }
+    }, 300),
+    []
   );
 
-  // Fetch categories for filters
-  const { data: categoriesData } = useApi(booksAPI.getCategories);
-
-  // Common departments (you might want to fetch these from API)
-  const departments = [
-    'Computer Science',
-    'Electrical Engineering',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Accountancy',
-    'Business Administration',
-    'Mass Communication',
-    'Science Laboratory Technology',
-    'Estate Management',
-    'Architecture'
-  ];
-
-  const updateFilters = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
-  };
-
-  const handleSearch = (searchTerm) => {
-    updateFilters({ search: searchTerm });
-  };
-
-  const handleFilterChange = (newFilters) => {
-    updateFilters(newFilters);
-  };
-
-  const handlePageChange = (page) => {
-    setFilters(prev => ({ ...prev, page }));
-  };
-
-  // Update URL when filters change
   useEffect(() => {
-    const newParams = new URLSearchParams();
-    
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value && value !== false) {
-        newParams.set(key, value.toString());
-      }
-    });
-    
-    setSearchParams(newParams);
-  }, [filters, setSearchParams]);
+    fetchBooks(searchTerm, selectedCategory, priceRange, sortBy);
+  }, [searchTerm, selectedCategory, priceRange, sortBy, fetchBooks]);
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handlePriceRangeChange = (range) => {
+    setPriceRange(range);
+  };
+
+  const handleSortChange = (sort) => {
+    setSortBy(sort);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Catalog</h1>
-          <p className="text-gray-600">
-            Browse our collection of academic books and resources
-          </p>
-        </div>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Book Catalog
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        Browse our collection of academic books and materials
+      </Typography>
 
-        {/* Search Bar */}
-        <div className="mb-8">
+      <Grid container spacing={4}>
+        {/* Filters Sidebar */}
+        <Grid item xs={12} md={3}>
+          <BookFilters
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange}
+            priceRange={priceRange}
+            onPriceRangeChange={handlePriceRangeChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+          />
+        </Grid>
+
+        {/* Books List */}
+        <Grid item xs={12} md={9}>
           <BookSearch onSearch={handleSearch} />
-        </div>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {books.length} books
+              {searchTerm && ` for "${searchTerm}"`}
+              {selectedCategory && ` in ${selectedCategory}`}
+            </Typography>
+          </Box>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:w-1/4">
-            <BookFilters
-              categories={categoriesData || []}
-              departments={departments}
-              onFilterChange={handleFilterChange}
-            />
-          </div>
-
-          {/* Books Grid */}
-          <div className="lg:w-3/4">
-            {/* Results Info */}
-            {booksData && (
-              <div className="mb-6 flex justify-between items-center">
-                <p className="text-gray-600">
-                  Showing {booksData.results?.length || 0} of {booksData.count || 0} books
-                </p>
-                
-                {/* Sort Options (to be implemented) */}
-                <select className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="title">Sort by Title</option>
-                  <option value="price_low">Price: Low to High</option>
-                  <option value="price_high">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
-                </select>
-              </div>
-            )}
-
-            <BookGrid
-              books={booksData?.results || []}
-              loading={loading}
-              error={error}
-            />
-
-            {/* Pagination */}
-            {booksData && booksData.total_pages > 1 && (
-              <Pagination
-                currentPage={filters.page}
-                totalPages={booksData.total_pages}
-                onPageChange={handlePageChange}
-                className="mt-8"
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+          <BookList books={books} loading={loading} error={error} />
+        </Grid>
+      </Grid>
+    </Container>
   );
 };
 

@@ -1,16 +1,16 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import VerificationForm from '../components/auth/VerificationForm';
+// import React from 'react';
+// import { Navigate } from 'react-router-dom';
+// import { useAuth } from '../context/AuthContext';
+// import VerificationForm from '../components/auth/VerificationForm';
 
-const VerifyEmail = () => {
-  const { isAuthenticated } = useAuth();
+// const VerifyEmail = () => {
+//   const { isAuthenticated } = useAuth();
 
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+//   if (isAuthenticated) {
+//     return <Navigate to="/" replace />;
+//   }
 
-  return <VerificationForm />;
-};
+//   return <VerificationForm />;
+// };
 
-export default VerifyEmail;
+// export default VerifyEmail;

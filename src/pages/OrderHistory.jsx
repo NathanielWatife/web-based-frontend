@@ -1,34 +1,218 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import OrderHistory from '../components/profile/OrderHistory';
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Box,
+  Paper,
+  Tabs,
+  Tab,
+  TextField,
+  InputAdornment
+} from '@mui/material';
+import { Search } from '@mui/icons-material';
+import OrderCard from '../components/orders/OrderCard';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { orderService } from '../services/orderService';
 
-const OrderHistoryPage = () => {
-  const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
+const TabPanel = ({ children, value, index, ...other }) => {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>Home</span>
-            <span>›</span>
-            <span>Profile</span>
-            <span>›</span>
-            <span className="text-gray-900">Orders</span>
-          </nav>
-        </div>
-
-        <OrderHistory />
-      </div>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`orders-tabpanel-${index}`}
+      aria-labelledby={`orders-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
 };
 
-export default OrderHistoryPage;
+const OrderHistory = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    filterOrders();
+  }, [orders, searchTerm, activeTab]);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const ordersData = await orderService.getUserOrders();
+      setOrders(ordersData);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterOrders = () => {
+    let filtered = orders;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(order => 
+        order._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.items.some(item => 
+          item.title.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by status based on active tab
+    if (activeTab === 1) {
+      filtered = filtered.filter(order => 
+        ['pending', 'confirmed', 'processing'].includes(order.status)
+      );
+    } else if (activeTab === 2) {
+      filtered = filtered.filter(order => order.status === 'ready_for_pickup');
+    } else if (activeTab === 3) {
+      filtered = filtered.filter(order => 
+        ['completed', 'cancelled'].includes(order.status)
+      );
+    }
+
+    setFilteredOrders(filtered);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const getTabLabel = (status) => {
+    const counts = {
+      all: orders.length,
+      active: orders.filter(order => ['pending', 'confirmed', 'processing'].includes(order.status)).length,
+      ready: orders.filter(order => order.status === 'ready_for_pickup').length,
+      completed: orders.filter(order => ['completed', 'cancelled'].includes(order.status)).length
+    };
+
+    const labels = [
+      `All Orders (${counts.all})`,
+      `Active (${counts.active})`,
+      `Ready for Pickup (${counts.ready})`,
+      `History (${counts.completed})`
+    ];
+
+    return labels[status];
+  };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        My Orders
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        View and track your book orders
+      </Typography>
+
+      <Paper sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={activeTab} onChange={handleTabChange}>
+            <Tab label={getTabLabel(0)} />
+            <Tab label={getTabLabel(1)} />
+            <Tab label={getTabLabel(2)} />
+            <Tab label={getTabLabel(3)} />
+          </Tabs>
+        </Box>
+
+        {/* Search Bar */}
+        <Box sx={{ p: 3, pb: 0 }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search orders by ID or book title..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
+        <TabPanel value={activeTab} index={0}>
+          {filteredOrders.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="h6" color="text.secondary">
+                No orders found
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {searchTerm ? 'Try adjusting your search terms' : 'You haven\'t placed any orders yet'}
+              </Typography>
+            </Box>
+          ) : (
+            filteredOrders.map(order => (
+              <OrderCard key={order._id} order={order} />
+            ))
+          )}
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={1}>
+          {filteredOrders.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="h6" color="text.secondary">
+                No active orders
+              </Typography>
+            </Box>
+          ) : (
+            filteredOrders.map(order => (
+              <OrderCard key={order._id} order={order} />
+            ))
+          )}
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={2}>
+          {filteredOrders.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="h6" color="text.secondary">
+                No orders ready for pickup
+              </Typography>
+            </Box>
+          ) : (
+            filteredOrders.map(order => (
+              <OrderCard key={order._id} order={order} />
+            ))
+          )}
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={3}>
+          {filteredOrders.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="h6" color="text.secondary">
+                No order history
+              </Typography>
+            </Box>
+          ) : (
+            filteredOrders.map(order => (
+              <OrderCard key={order._id} order={order} />
+            ))
+          )}
+        </TabPanel>
+      </Paper>
+    </Container>
+  );
+};
+
+export default OrderHistory;

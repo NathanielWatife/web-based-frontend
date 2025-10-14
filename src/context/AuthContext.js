@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/auth';
-import toast from 'react-hot-toast';
+import { authService } from '../services/authService';
+import { getAuthToken, removeAuthToken, setAuthToken } from '../utils/helpers';
 
 const AuthContext = createContext();
 
@@ -15,106 +15,73 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    checkAuth();
+    checkAuthStatus();
   }, []);
 
-  const checkAuth = async () => {
+  const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getAuthToken();
       if (token) {
-        const userData = await authAPI.getProfile();
+        const userData = await authService.getCurrentUser();
         setUser(userData);
-        setIsAuthenticated(true);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      logout();
+      removeAuthToken();
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (credentials) => {
+  const login = async (email, password) => {
     try {
-      const data = await authAPI.login(credentials);
-      const { access, refresh, user: userData } = data;
-      
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      setUser(userData);
-      setIsAuthenticated(true);
-      toast.success('Login successful!');
-      
-      return { success: true };
+      setError(null);
+      const response = await authService.login(email, password);
+      setAuthToken(response.token);
+      setUser(response.user);
+      return response;
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
-      toast.error(message);
-      return { success: false, error: message };
+      setError(error.response?.data?.message || 'Login failed');
+      throw error;
     }
   };
 
   const register = async (userData) => {
     try {
-      const data = await authAPI.register(userData);
-      toast.success('Registration successful! Please check your email for verification.');
-      return { success: true, data };
+      setError(null);
+      const response = await authService.register(userData);
+      setAuthToken(response.token);
+      setUser(response.user);
+      return response;
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
-
-  const verifyEmail = async (verificationData) => {
-    try {
-      const data = await authAPI.verifyEmail(verificationData);
-      toast.success('Email verified successfully!');
-      return { success: true, data };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Verification failed';
-      toast.error(message);
-      return { success: false, error: message };
+      setError(error.response?.data?.message || 'Registration failed');
+      throw error;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
+    removeAuthToken();
     setUser(null);
-    setIsAuthenticated(false);
-    toast.success('Logged out successfully');
+    setError(null);
   };
 
-  const updateProfile = async (profileData) => {
-    try {
-      const data = await authAPI.updateProfile(profileData);
-      setUser(data);
-      localStorage.setItem('user', JSON.stringify(data));
-      toast.success('Profile updated successfully!');
-      return { success: true, data };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Profile update failed';
-      toast.error(message);
-      return { success: false, error: message };
-    }
+  const updateUser = (userData) => {
+    setUser(userData);
   };
 
   const value = {
     user,
     loading,
-    isAuthenticated,
+    error,
     login,
     register,
-    verifyEmail,
     logout,
-    updateProfile,
-    checkAuth
+    updateUser,
+    isAuthenticated: !!user,
+    isAdmin: user?.role === 'admin'
   };
 
   return (
