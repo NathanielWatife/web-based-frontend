@@ -14,14 +14,6 @@ export const ORDER_STATUS = {
   CANCELLED: 'cancelled'
 };
 
-export const ORDER_STATUSES = {
-  PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  PROCESSING: 'processing',
-  READY_FOR_PICKUP: 'ready_for_pickup',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled'
-};
 
 export const PICKUP_OPTIONS = {
   DELIVERY: 'delivery',

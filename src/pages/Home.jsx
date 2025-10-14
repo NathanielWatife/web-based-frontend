@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { School, LocalLibrary, Speed } from '@mui/icons-material';
+import { getHeroImage } from '../utils/placeholders';
 
 const Home = () => {
   const features = [
@@ -35,7 +36,7 @@ const Home = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #10813dff 0%, #10813dff 100%)',
           color: 'white',
           py: 8,
           mb: 6
@@ -90,12 +91,15 @@ const Home = () => {
             <Grid item xs={12} md={6}>
               <Box
                 component="img"
-                src="/library-hero.jpg"
+                src={getHeroImage()}
                 alt="Library"
                 sx={{
                   width: '100%',
                   borderRadius: 2,
                   boxShadow: 3
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
                 }}
               />
             </Grid>

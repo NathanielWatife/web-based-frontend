@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 api.interceptors.request.use(
@@ -27,8 +28,23 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      // Only redirect if not already on login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
+    
+    // Enhanced error handling
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout:', error);
+      throw new Error('Request timeout. Please check your connection and try again.');
+    }
+    
+    if (!error.response) {
+      console.error('Network error:', error);
+      throw new Error('Network error. Please check your internet connection.');
+    }
+    
     return Promise.reject(error);
   }
 );

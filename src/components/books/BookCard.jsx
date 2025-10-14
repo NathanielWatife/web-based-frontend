@@ -11,12 +11,17 @@ import {
 import { AddShoppingCart } from '@mui/icons-material';
 import { useCart } from '../../context/CartContext';
 import { formatPrice } from '../../utils/helpers';
+import { getBookCoverPlaceholder } from '../../utils/placeholders';
 
 const BookCard = ({ book }) => {
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
     addToCart(book, 1);
+  };
+
+  const handleImageError = (e) => {
+    e.target.src = getBookCoverPlaceholder(book.title);
   };
 
   return (
@@ -35,9 +40,10 @@ const BookCard = ({ book }) => {
       <CardMedia
         component="img"
         height="200"
-        image={book.imageUrl || '/placeholder-book.jpg'}
+        image={book.imageUrl || getBookCoverPlaceholder(book.title)}
         alt={book.title}
         sx={{ objectFit: 'cover' }}
+        onError={handleImageError}
       />
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography gutterBottom variant="h6" component="h2" noWrap>
