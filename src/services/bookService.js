@@ -1,38 +1,27 @@
 import api from './api';
 
 export const bookService = {
-  async getAllBooks(params = {}) {
-    const response = await api.get('/books', { params });
-    return response.data;
+  getAllBooks: (params = {}) => {
+    return api.get('/books', { params });
   },
 
-  async getBookById(id) {
-    const response = await api.get(`/books/${id}`);
-    return response.data;
+  getBook: (id) => {
+    return api.get(`/books/${id}`);
   },
 
-  async searchBooks(query) {
-    const response = await api.get('/books', { params: { search: query } });
-    return response.data;
+  getCategories: () => {
+    return api.get('/books/categories');
   },
 
-  async getBooksByCategory(category) {
-    const response = await api.get('/books', { params: { category } });
-    return response.data;
+  createBook: (bookData) => {
+    return api.post('/books', bookData);
   },
 
-  async createBook(bookData) {
-    const response = await api.post('/admin/books', bookData);
-    return response.data;
+  updateBook: (id, bookData) => {
+    return api.put(`/books/${id}`, bookData);
   },
 
-  async updateBook(id, bookData) {
-    const response = await api.put(`/admin/books/${id}`, bookData);
-    return response.data;
-  },
-
-  async deleteBook(id) {
-    const response = await api.delete(`/admin/books/${id}`);
-    return response.data;
+  deleteBook: (id) => {
+    return api.delete(`/books/${id}`);
   }
 };

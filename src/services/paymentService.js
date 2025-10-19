@@ -1,52 +1,59 @@
 import api from './api';
 
 export const paymentService = {
-  async initializePayment(paymentData) {
-    const response = await api.post('/payments/initialize', paymentData);
-    return response.data;
+  initializePayment: (paymentData) => {
+    return api.post('/payments/initialize', paymentData);
   },
 
-  async verifyPayment(reference) {
-    const response = await api.get(`/payments/verify/${reference}`);
-    return response.data;
+  verifyPayment: (reference) => {
+    return api.get(`/payments/verify/${reference}`);
   },
 
-  // For direct Paystack integration (client-side)
-  initializePaystackCheckout(amount, email, callback) {
-    if (window.PaystackPop) {
-      const handler = window.PaystackPop.setup({
-        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
-        email: email,
-        amount: amount * 100, // Convert to kobo
-        currency: 'NGN',
-        ref: `PS_${Math.floor(Math.random() * 1000000000 + 1)}`,
-        callback: function(response) {
-          callback(response);
-        },
-        onClose: function() {
-          callback({ cancelled: true });
-        }
-      });
+  // Paystack integration
+  initializePaystack: (email, amount, reference, metadata = {}) => {
+    const handler = window.PaystackPop && window.PaystackPop.setup({
+      key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+      email,
+      amount: amount * 100, // Convert to kobo
+      reference,
+      metadata,
+      onClose: () => {
+        console.log('Payment window closed.');
+      },
+      callback: (response) => {
+        return response;
+      }
+    });
+    
+    if (handler) {
       handler.openIframe();
-    } else {
-      console.error('Paystack not loaded');
     }
+  },
+
+  // Flutterwave integration
+  initializeFlutterwave: (email, amount, reference, metadata = {}) => {
+    return new Promise((resolve, reject) => {
+      if (window.FlutterwaveCheckout) {
+        window.FlutterwaveCheckout({
+          public_key: process.env.REACT_APP_FLUTTERWAVE_PUBLIC_KEY,
+          tx_ref: reference,
+          amount,
+          currency: 'NGN',
+          payment_options: 'card, banktransfer, ussd',
+          customer: {
+            email,
+          },
+          customizations: {
+            title: 'YabaTech BookStore',
+            description: 'Payment for books',
+            logo: '/logo.png',
+          },
+          callback: (response) => resolve(response),
+          onclose: () => reject(new Error('Payment closed')),
+        });
+      } else {
+        reject(new Error('Flutterwave not loaded'));
+      }
+    });
   }
-};
-
-// Load Paystack script dynamically
-export const loadPaystackScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.PaystackPop) {
-      resolve();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Paystack'));
-    document.head.appendChild(script);
-  });
 };

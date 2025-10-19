@@ -1,0 +1,71 @@
+.email-verification {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.verification-card {
+  background: var(--surface-color);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.verification-card h2 {
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.verification-card p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.code-inputs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.code-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: white;
+}
+
+.code-input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 111, 0.1);
+}
+
+.code-input:disabled {
+  background: var(--background-color);
+  cursor: not-allowed;
+}
+
+.verification-actions {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.verification-actions p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+}
+
+.w-100 {
+  width: 100%;
+}

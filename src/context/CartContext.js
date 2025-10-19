@@ -14,14 +14,14 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('yabatech_cart');
+    const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       setCartItems(JSON.parse(savedCart));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('yabatech_cart', JSON.stringify(cartItems));
+    localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (book, quantity = 1) => {

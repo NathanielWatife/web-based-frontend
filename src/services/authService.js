@@ -1,23 +1,37 @@
 import api from './api';
 
 export const authService = {
-  async login(email, password) {
-    const response = await api.post('/auth/login', { email, password });
-    return response.data;
+  login: (matricNo, password) => {
+    return api.post('/auth/login', { matricNo, password });
   },
 
-  async register(userData) {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+  register: (userData) => {
+    return api.post('/auth/register', userData);
   },
 
-  async getCurrentUser() {
-    const response = await api.get('/auth/me');
-    return response.data;
+  verifyEmail: (matricNo, verificationCode) => {
+    return api.post('/auth/verify-email', { matricNo, verificationCode });
   },
 
-  async updateProfile(userData) {
-    const response = await api.put('/auth/profile', userData);
-    return response.data;
+  resendVerification: (matricNo) => {
+    return api.post('/auth/resend-verification', { matricNo });
+  },
+
+  verifyToken: (token) => {
+    return api.get('/auth/verify-token', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  forgotPassword: (email) => {
+    return api.post('/auth/forgot-password', { email });
+  },
+
+  resetPassword: (token, newPassword) => {
+    return api.post('/auth/reset-password', { token, newPassword });
+  },
+
+  adminLogin: (email, password) => {
+    return api.post('/auth/admin/login', { email, password });
   }
 };

@@ -1,20 +1,18 @@
 {
-  "name": "yabatech-bookstore-frontend",
-  "version": "1.0.0",
-  "description": "YabaTech Bookstore - Web-Based Book Ordering System Frontend",
+  "name": "web-based-frontend",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.16",
-    "@mui/material": "^5.14.17",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.5.1",
-    "axios": "^1.5.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.16.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.12.2",
+    "lucide-react": "^0.546.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.4",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
@@ -22,20 +20,13 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "react-scripts start",
-    "lint": "eslint src --ext .js,.jsx",
-    "lint:fix": "eslint src --ext .js,.jsx --fix"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ],
-    "rules": {
-      "no-unused-vars": "warn",
-      "react-hooks/exhaustive-deps": "warn"
-    }
+    ]
   },
   "browserslist": {
     "production": [
@@ -50,27 +41,8 @@
     ]
   },
   "devDependencies": {
-    "eslint": "^8.52.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0"
-  },
-  "keywords": [
-    "react",
-    "bookstore",
-    "yabatech",
-    "ecommerce",
-    "material-ui",
-    "education"
-  ],
-  "author": "YabaTech Bookstore Team",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-username/yabatech-bookstore-frontend"
-  },
-  "bugs": {
-    "url": "https://github.com/your-username/yabatech-bookstore-frontend/issues"
-  },
-  "homepage": ".",
-  "proxy": "https://yababookshop-api.onrender.com"
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14"
+  }
 }

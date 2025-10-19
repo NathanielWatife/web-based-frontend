@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { getAuthToken } from '../utils/helpers';
 import { API_BASE_URL } from '../utils/constants';
 
 const api = axios.create({
@@ -7,12 +6,12 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 second timeout
 });
 
+// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,28 +22,14 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      // Only redirect if not already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
-    
-    // Enhanced error handling
-    if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout:', error);
-      throw new Error('Request timeout. Please check your connection and try again.');
-    }
-    
-    if (!error.response) {
-      console.error('Network error:', error);
-      throw new Error('Network error. Please check your internet connection.');
-    }
-    
     return Promise.reject(error);
   }
 );

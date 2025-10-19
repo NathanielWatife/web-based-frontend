@@ -1,23 +1,26 @@
-export const formatPrice = (price) => {
+export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: 'NGN'
-  }).format(price);
+  }).format(amount);
 };
 
-export const getAuthToken = () => {
-  return localStorage.getItem('authToken');
+export const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-NG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 };
 
-export const setAuthToken = (token) => {
-  localStorage.setItem('authToken', token);
-};
-
-export const removeAuthToken = () => {
-  localStorage.removeItem('authToken');
+export const generateMatricNo = (faculty, programme, admissionYear, studentNumber) => {
+  const facultyCode = faculty.charAt(0).toUpperCase();
+  const programmeCode = programme === 'National Diploma' ? 'ND' : 'HND';
+  const yearCode = admissionYear.slice(-2);
+  return `${facultyCode}/${programmeCode}/${yearCode}/${studentNumber}`;
 };
 
 export const validateMatricNo = (matricNo) => {
-  const matricRegex = /^[A-Z]{3}\/\d{4}\/\d{3}$/;
-  return matricRegex.test(matricNo);
+  const pattern = /^[A-Z]\/[A-Z]{2}\/\d{2}\/\d+$/;
+  return pattern.test(matricNo);
 };

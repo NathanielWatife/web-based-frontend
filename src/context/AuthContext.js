@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authService } from '../services/authService';
-import { getAuthToken, removeAuthToken, setAuthToken } from '../utils/helpers';
 
 const AuthContext = createContext();
 
@@ -15,61 +14,70 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    checkAuthStatus();
+    const token = localStorage.getItem('token');
+    if (token) {
+      authService.verifyToken(token)
+        .then(response => {
+          setUser(response.data.user);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  const checkAuthStatus = async () => {
+  const login = async (matricNo, password) => {
     try {
-      const token = getAuthToken();
-      if (token) {
-        const userData = await authService.getCurrentUser();
-        setUser(userData);
-      }
+      setError('');
+      const response = await authService.login(matricNo, password);
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+      setUser(user);
+      return { success: true };
     } catch (error) {
-      console.error('Auth check failed:', error);
-      removeAuthToken();
-    } finally {
-      setLoading(false);
+      setError(error.response?.data?.message || 'Login failed');
+      return { success: false, error: error.response?.data?.message };
     }
   };
 
-  const login = async (email, password) => {
+  const adminLogin = async (email, password) => {
     try {
-      setError(null);
-      const response = await authService.login(email, password);
-      setAuthToken(response.token);
-      setUser(response.user);
-      return response;
+      setError('');
+      const response = await authService.adminLogin(email, password);
+      const { token, user } = response.data;
+
+      localStorage.setItem('token', token);
+      setUser(user);
+      return { success: true };
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed');
-      throw error;
+      setError(error.response?.data?.message || 'Admin login failed');
+      return { success: false, error: error.response?.data?.message };
     }
   };
 
   const register = async (userData) => {
     try {
-      setError(null);
+      setError('');
       const response = await authService.register(userData);
-      setAuthToken(response.token);
-      setUser(response.user);
-      return response;
+      return { success: true, data: response.data };
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed');
-      throw error;
+      return { success: false, error: error.response?.data?.message };
     }
   };
 
   const logout = () => {
-    removeAuthToken();
+    localStorage.removeItem('token');
     setUser(null);
-    setError(null);
-  };
-
-  const updateUser = (userData) => {
-    setUser(userData);
   };
 
   const value = {
@@ -77,9 +85,10 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    adminLogin,
     register,
     logout,
-    updateUser,
+    setError,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin'
   };
