@@ -17,12 +17,13 @@ const API_BASE_URL = (() => {
 })();
 
 // Create axios instance with default configuration
+const DEFAULT_TIMEOUT_MS = Number(process.env.REACT_APP_API_TIMEOUT || 20000); // default 20s to handle cold starts
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 seconds timeout
+  timeout: DEFAULT_TIMEOUT_MS,
   withCredentials: false, // Set to true if you need to send cookies
 });
 
