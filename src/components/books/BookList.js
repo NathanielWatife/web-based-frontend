@@ -29,8 +29,9 @@ const BookList = () => {
       if (filters.minPrice) params.minPrice = filters.minPrice;
       if (filters.maxPrice) params.maxPrice = filters.maxPrice;
 
-      const response = await bookService.getAllBooks(params);
-      setBooks(response.data);
+  const response = await bookService.getAllBooks(params);
+  const list = Array.isArray(response.data?.data) ? response.data.data : [];
+  setBooks(list);
     } catch (error) {
       setError('Failed to load books');
       console.error('Error loading books:', error);
@@ -60,6 +61,14 @@ const BookList = () => {
         <div className="error-message">
           {error}
         </div>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(books)) {
+    return (
+      <div className="book-list-container">
+        <div className="error-message">Unexpected response format.</div>
       </div>
     );
   }

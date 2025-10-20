@@ -19,5 +19,10 @@ export const orderService = {
 
   updateOrderStatus: (id, status) => {
     return api.put(`/admin/orders/${id}/status`, { status });
+  },
+
+  // Admin methods
+  getAllOrders: (params = {}) => {
+    return api.get('/admin/orders', { params });
   }
 };

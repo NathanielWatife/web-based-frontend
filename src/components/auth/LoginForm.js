@@ -11,7 +11,7 @@ const LoginForm = ({ isAdmin = false }) => {
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login, adminLogin, error, setError } = useAuth();
   const navigate = useNavigate();
 

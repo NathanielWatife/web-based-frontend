@@ -49,8 +49,13 @@ const RegisterForm = () => {
     setIsLoading(false);
 
     if (result.success) {
-      navigate('/login', { 
-        state: { message: 'Registration successful! Please check your email for verification.' }
+      // Redirect to email verification page with context for the user
+      navigate(`/verify-email?matricNo=${encodeURIComponent(formData.matricNo)}&email=${encodeURIComponent(formData.email)}` , {
+        state: {
+          matricNo: formData.matricNo,
+          email: formData.email,
+          message: 'Registration successful! Please check your email for the 6-digit verification code.'
+        }
       });
     }
   };
@@ -222,7 +227,6 @@ const RegisterForm = () => {
               />
             </div>
           </div>
-
           <button 
             type="submit" 
             className="btn btn-primary w-100"

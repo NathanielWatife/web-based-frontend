@@ -18,8 +18,9 @@ const OrderHistory = () => {
 
   const loadOrders = async () => {
     try {
-      const response = await orderService.getMyOrders();
-      setOrders(response.data);
+  const response = await orderService.getMyOrders();
+  const list = Array.isArray(response.data?.data) ? response.data.data : [];
+  setOrders(list);
     } catch (error) {
       setError('Failed to load orders');
       console.error('Error loading orders:', error);
@@ -67,7 +68,7 @@ const OrderHistory = () => {
           </div>
         )}
 
-        {orders.length === 0 ? (
+        {!Array.isArray(orders) || orders.length === 0 ? (
           <div className="empty-state">
             <h3>No orders found</h3>
             <p>You haven't placed any orders yet.</p>

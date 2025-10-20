@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -11,6 +12,13 @@ const EmailVerification = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const qpMatricNo = searchParams.get('matricNo');
+  const qpEmail = searchParams.get('email');
+  const pendingMatricNo = qpMatricNo || location.state?.matricNo || user?.matricNo || '';
+  const pendingEmail = qpEmail || location.state?.email || user?.email || '';
 
   useEffect(() => {
     if (countdown > 0) {
@@ -53,9 +61,14 @@ const EmailVerification = () => {
     setError('');
 
     try {
-      const response = await authService.verifyEmail(user.matricNo, code);
+      if (!pendingMatricNo) {
+        setError('Missing matric number. Please log in and try again.');
+        return;
+      }
+      const response = await authService.verifyEmail(pendingMatricNo, code);
       setMessage('Email verified successfully!');
-      // Redirect or update user state here
+      // After successful verification, navigate to login for sign-in
+      setTimeout(() => navigate('/login', { state: { message: 'Email verified! You can now log in.' } }), 1000);
     } catch (error) {
       setError(error.response?.data?.message || 'Verification failed');
     } finally {
@@ -68,7 +81,12 @@ const EmailVerification = () => {
     setError('');
 
     try {
-      await authService.resendVerification(user.matricNo);
+      if (!pendingMatricNo) {
+        setError('Missing matric number. Please log in and try again.');
+        setLoading(false);
+        return;
+      }
+      await authService.resendVerification(pendingMatricNo);
       setMessage('Verification code sent to your email');
       setCountdown(60); // 60 seconds countdown
     } catch (error) {
@@ -77,12 +95,14 @@ const EmailVerification = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="email-verification">
       <div className="verification-card">
         <h2>Verify Your Email</h2>
-        <p>We've sent a 6-digit verification code to your email address</p>
+        <p>We've sent a 6-digit verification code to your email address{pendingEmail ? ` (${pendingEmail})` : ''}</p>
+        {location.state?.message && (
+          <div className="info-message">{location.state.message}</div>
+        )}
         
         {message && (
           <div className="success-message">

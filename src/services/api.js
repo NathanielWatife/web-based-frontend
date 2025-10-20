@@ -1,35 +1,80 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../utils/constants';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+// Create axios instance with default configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 seconds timeout
+  withCredentials: false, // Set to true if you need to send cookies
 });
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+    console.log(`Making ${config.method?.toUpperCase()} request to: ${config.url}`);
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
+    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`Response received: ${response.status} from ${response.config.url}`);
+    return response;
+  },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    console.error('Response error:', error);
+    
+    if (error.response) {
+      // Server responded with error status
+      const { status, data } = error.response;
+      
+      console.error(`API Error ${status}:`, data);
+      
+      if (status === 401) {
+        // Unauthorized - remove token and redirect to login
+        localStorage.removeItem('token');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      } else if (status === 403) {
+        // Forbidden
+        console.error('Access denied');
+      } else if (status === 404) {
+        // Not found
+        console.error('Resource not found');
+      } else if (status >= 500) {
+        // Server error
+        console.error('Server error occurred');
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('No response received:', error.request);
+      
+      if (error.code === 'ECONNABORTED') {
+        console.error('Request timeout');
+      } else if (error.message === 'Network Error') {
+        console.error('Network error - please check your connection');
+      }
+    } else {
+      // Something else happened
+      console.error('Error setting up request:', error.message);
     }
+    
     return Promise.reject(error);
   }
 );
