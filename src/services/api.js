@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+// Use backend URL from env only; no localhost fallback in production builds.
+const rawBase = process.env.REACT_APP_API_URL;
+
+if (!rawBase) {
+  // Crash early with a clear message to avoid silent misroutes
+  throw new Error(
+    'REACT_APP_API_URL is not set. Configure it to your backend base URL (e.g., https://yababookshop-api.onrender.com).'
+  );
+}
+
+// Normalize to ensure a single '/api' suffix
+const API_BASE_URL = (() => {
+  const trimmed = rawBase.replace(/\/$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+})();
 
 // Create axios instance with default configuration
 const api = axios.create({
