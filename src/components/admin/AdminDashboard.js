@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { bookService } from '../../services/bookService';
-import { orderService } from '../../services/orderService';
+import { adminService } from '../../services/adminService';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/AdminDashboard.css';
@@ -21,29 +20,19 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Simulate API calls
-      const [booksResponse, ordersResponse] = await Promise.all([
-        bookService.getAllBooks(),
-        orderService.getMyOrders() // This would be admin endpoint in real app
-      ]);
-
-      const books = booksResponse.data;
-      const orders = ordersResponse.data;
-
-      const totalRevenue = orders
-        .filter(order => order.paymentStatus === 'successful')
-        .reduce((sum, order) => sum + order.totalAmount, 0);
-
-      const pendingOrders = orders.filter(order => order.status === 'pending').length;
+      const response = await adminService.getDashboardStats();
+      const data = response.data?.data || {};
+      const s = data.stats || {};
+      const recent = Array.isArray(data.recentOrders) ? data.recentOrders : [];
 
       setStats({
-        totalBooks: books.length,
-        totalOrders: orders.length,
-        totalRevenue,
-        pendingOrders
+        totalBooks: s.totalBooks || 0,
+        totalOrders: s.totalOrders || 0,
+        totalRevenue: s.totalRevenue || 0,
+        pendingOrders: s.pendingOrders || 0,
       });
 
-      setRecentOrders(orders.slice(0, 5));
+      setRecentOrders(recent);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
