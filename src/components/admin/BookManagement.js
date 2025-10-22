@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { bookService } from '../../services/bookService';
 import { BOOK_CATEGORIES } from '../../utils/constants';
 import { formatCurrency } from '../../utils/helpers';
@@ -22,6 +22,10 @@ const BookManagement = () => {
     stockQuantity: '',
     imageUrl: ''
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     loadBooks();
@@ -47,13 +51,67 @@ const BookManagement = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+    }
+  };
+
+  // Update preview when file or imageUrl changes
+  useEffect(() => {
+    let url;
+    if (imageFile) {
+      url = URL.createObjectURL(imageFile);
+      setPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setPreviewUrl(formData.imageUrl || '');
+    }
+  }, [imageFile, formData.imageUrl]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingBook) {
-        await bookService.updateBook(editingBook._id, formData);
+      let payload;
+      if (imageFile) {
+        // Build multipart form data when an image is selected
+        payload = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) payload.append(key, value);
+        });
+        payload.append('image', imageFile);
       } else {
-        await bookService.createBook(formData);
+        // Fallback to JSON when no image file selected (uses imageUrl if provided)
+        payload = { ...formData };
+      }
+
+      if (editingBook) {
+        await bookService.updateBook(editingBook._id, payload);
+      } else {
+        await bookService.createBook(payload);
       }
       setShowForm(false);
       setEditingBook(null);
@@ -61,6 +119,7 @@ const BookManagement = () => {
         title: '', author: '', isbn: '', description: '', price: '',
         category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
       });
+      setImageFile(null);
       loadBooks();
     } catch (error) {
       console.error('Error saving book:', error);
@@ -81,6 +140,7 @@ const BookManagement = () => {
       stockQuantity: book.stockQuantity,
       imageUrl: book.imageUrl || ''
     });
+    setImageFile(null);
     setShowForm(true);
   };
 
@@ -102,6 +162,7 @@ const BookManagement = () => {
       title: '', author: '', isbn: '', description: '', price: '',
       category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
     });
+    setImageFile(null);
   };
 
   if (loading) {
@@ -252,6 +313,40 @@ const BookManagement = () => {
                   className="form-input"
                   placeholder="https://example.com/image.jpg"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Upload Image (preferred)</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="form-input"
+                  style={{ display: 'none' }}
+                />
+                <div
+                  className={`dropzone ${dragActive ? 'active' : ''}`}
+                  onDragEnter={handleDragOver}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  role="button"
+                  tabIndex={0}
+                >
+                  {previewUrl ? (
+                    <div className="image-preview">
+                      <img src={previewUrl} alt="Preview" />
+                    </div>
+                  ) : (
+                    <div className="dropzone-instructions">
+                      <span className="action-icon">📁</span>
+                      <p>Drag & drop an image here, or click to select</p>
+                      <small>PNG, JPG up to 5MB</small>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="form-actions">

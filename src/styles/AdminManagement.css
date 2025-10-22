@@ -265,6 +265,47 @@
   grid-column: 1 / -1;
 }
 
+/* Upload / Dropzone */
+.dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: var(--background-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.dropzone.active {
+  border-color: var(--primary-color);
+  background: #f0f9f5;
+}
+
+.dropzone-instructions p {
+  margin: 0.25rem 0;
+}
+
+.dropzone-instructions small {
+  color: var(--text-secondary);
+}
+
+.image-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+  object-fit: cover;
+}
+
 @media (max-width: 768px) {
   .management-header {
     flex-direction: column;

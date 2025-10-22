@@ -14,11 +14,13 @@ export const bookService = {
   },
 
   createBook: (bookData) => {
-    return api.post('/books', bookData);
+    const isForm = typeof FormData !== 'undefined' && bookData instanceof FormData;
+    return api.post('/books', bookData, isForm ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined);
   },
 
   updateBook: (id, bookData) => {
-    return api.put(`/books/${id}`, bookData);
+    const isForm = typeof FormData !== 'undefined' && bookData instanceof FormData;
+    return api.put(`/books/${id}`, bookData, isForm ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined);
   },
 
   deleteBook: (id) => {
