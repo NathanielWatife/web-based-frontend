@@ -85,12 +85,7 @@ const UserManagement = () => {
             </div>
             <div className="date">{formatDate(user.createdAt)}</div>
             <div className="actions">
-              <button 
-                onClick={() => toggleVerification(user._id)}
-                className={`btn ${user.isVerified ? 'btn-outline' : 'btn-primary'}`}
-              >
-                {user.isVerified ? 'Unverify' : 'Verify'}
-              </button>
+              <span>-</span>
             </div>
           </div>
         ))}
