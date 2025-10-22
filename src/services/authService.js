@@ -9,14 +9,6 @@ export const authService = {
     return api.post('/auth/register', userData);
   },
 
-  verifyEmail: (matricNo, verificationCode) => {
-    return api.post('/auth/verify-email', { matricNo, verificationCode });
-  },
-
-  resendVerification: (matricNo) => {
-    return api.post('/auth/resend-verification', { matricNo });
-  },
-
   verifyToken: (token) => {
     return api.get('/auth/verify-token', {
       headers: { Authorization: `Bearer ${token}` }

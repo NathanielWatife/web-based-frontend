@@ -49,12 +49,9 @@ const RegisterForm = () => {
     setIsLoading(false);
 
     if (result.success) {
-      // Redirect to email verification page with context for the user
-      navigate(`/verify-email?matricNo=${encodeURIComponent(formData.matricNo)}&email=${encodeURIComponent(formData.email)}` , {
+      navigate('/login', {
         state: {
-          matricNo: formData.matricNo,
-          email: formData.email,
-          message: 'Registration successful! Please check your email for the 6-digit verification code.'
+          message: 'Registration successful! You can now log in.'
         }
       });
     }

@@ -18,7 +18,6 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import BookManagement from './components/admin/BookManagement';
 import OrderManagement from './components/admin/OrderManagement';
 import UserManagement from './components/admin/UserManagement';
-import EmailVerification from './components/auth/EmailVerification';
 import PasswordReset from './components/auth/PasswordReset';
 import './styles/index.css';
 
@@ -37,7 +36,6 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/reset-password" element={<PasswordReset />} />
 
                 {/* Protected Routes */}
