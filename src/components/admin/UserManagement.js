@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { adminService } from '../../services/adminService';
 import { formatDate } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/AdminManagement.css';
@@ -10,38 +11,14 @@ const UserManagement = () => {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [filter]);
 
   const loadUsers = async () => {
     try {
-      // Simulate API call - this would be an admin endpoint
-      const mockUsers = [
-        {
-          _id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@student.yabatech.edu.ng',
-          matricNo: 'F/ND/23/321001',
-          faculty: 'School of Technology',
-          department: 'Computer Science',
-          isVerified: true,
-          role: 'student',
-          createdAt: '2024-01-15T10:00:00Z'
-        },
-        {
-          _id: '2',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane.smith@student.yabatech.edu.ng',
-          matricNo: 'F/HND/23/321002',
-          faculty: 'School of Business',
-          department: 'Business Administration',
-          isVerified: true,
-          role: 'student',
-          createdAt: '2024-01-16T11:00:00Z'
-        }
-      ];
-      setUsers(mockUsers);
+      const params = filter === 'all' ? {} : { verified: filter === 'verified' };
+      const response = await adminService.getAllUsers(params);
+      const data = response.data?.data;
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading users:', error);
     } finally {
@@ -49,18 +26,7 @@ const UserManagement = () => {
     }
   };
 
-  const toggleVerification = async (userId) => {
-    try {
-      // Simulate API call to toggle verification
-      setUsers(prev => prev.map(user => 
-        user._id === userId 
-          ? { ...user, isVerified: !user.isVerified }
-          : user
-      ));
-    } catch (error) {
-      console.error('Error updating user:', error);
-    }
-  };
+  // Verification toggling removed as email verification is not used anymore
 
   const filteredUsers = filter === 'all' 
     ? users 

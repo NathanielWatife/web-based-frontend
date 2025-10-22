@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { orderService } from '../../services/orderService';
+import { adminService } from '../../services/adminService';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { ORDER_STATUS } from '../../utils/constants';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -12,12 +12,14 @@ const OrderManagement = () => {
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [filter]);
 
   const loadOrders = async () => {
     try {
-      const response = await orderService.getMyOrders(); // Would be admin endpoint
-      setOrders(response.data);
+      const params = filter === 'all' ? {} : { status: filter };
+      const response = await adminService.getAllOrders(params);
+      const data = response.data?.data;
+      setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading orders:', error);
     } finally {
@@ -27,7 +29,7 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await orderService.updateOrderStatus(orderId, newStatus);
+      await adminService.updateOrderStatus(orderId, newStatus);
       loadOrders(); // Reload orders to get updated data
     } catch (error) {
       console.error('Error updating order status:', error);

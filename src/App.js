@@ -18,6 +18,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import BookManagement from './components/admin/BookManagement';
 import OrderManagement from './components/admin/OrderManagement';
 import UserManagement from './components/admin/UserManagement';
+import Reports from './components/admin/Reports';
 import PasswordReset from './components/auth/PasswordReset';
 import './styles/index.css';
 
@@ -50,6 +51,7 @@ function App() {
                 <Route path="/admin/books" element={<BookManagement />} />
                 <Route path="/admin/orders" element={<OrderManagement />} />
                 <Route path="/admin/users" element={<UserManagement />} />
+                <Route path="/admin/reports" element={<Reports />} />
               </Routes>
             </main>
             <Footer />

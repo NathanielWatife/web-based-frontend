@@ -30,7 +30,8 @@ const BookManagement = () => {
   const loadBooks = async () => {
     try {
       const response = await bookService.getAllBooks();
-      setBooks(response.data);
+      const data = response.data?.data;
+      setBooks(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading books:', error);
     } finally {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -13,6 +14,7 @@ const AdminDashboard = () => {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDashboardData();
@@ -141,19 +143,19 @@ const AdminDashboard = () => {
       <div className="dashboard-section">
         <h2>Quick Actions</h2>
         <div className="quick-actions">
-          <button className="action-btn">
+          <button className="action-btn" onClick={() => navigate('/admin/books')}>
             <span className="action-icon">➕</span>
             <span>Add New Book</span>
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={() => navigate('/admin/orders')}>
             <span className="action-icon">📦</span>
             <span>Manage Orders</span>
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={() => navigate('/admin/users')}>
             <span className="action-icon">👥</span>
             <span>View Users</span>
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={() => navigate('/admin/reports')}>
             <span className="action-icon">📊</span>
             <span>View Reports</span>
           </button>

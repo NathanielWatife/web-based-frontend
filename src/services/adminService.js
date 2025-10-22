@@ -9,7 +9,12 @@ export const adminService = {
     return api.get('/admin/users', { params });
   },
 
-  updateUserVerification: (userId, isVerified) => {
-    return api.put(`/admin/users/${userId}/verify`, { isVerified });
+  // Orders (admin)
+  getAllOrders: (params = {}) => {
+    return api.get('/admin/orders', { params });
+  },
+
+  updateOrderStatus: (orderId, status) => {
+    return api.put(`/admin/orders/${orderId}/status`, { status });
   }
 };
