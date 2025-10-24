@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminService } from '../../services/adminService';
 import { formatDate } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -9,11 +9,7 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    loadUsers();
-  }, [filter]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const params = filter === 'all' ? {} : { verified: filter === 'verified' };
       const response = await adminService.getAllUsers(params);
@@ -24,7 +20,11 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   // Verification toggling removed as email verification is not used anymore
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { adminService } from '../../services/adminService';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { ORDER_STATUS } from '../../utils/constants';
@@ -10,11 +10,7 @@ const OrderManagement = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    loadOrders();
-  }, [filter]);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       const params = filter === 'all' ? {} : { status: filter };
       const response = await adminService.getAllOrders(params);
@@ -25,7 +21,11 @@ const OrderManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
