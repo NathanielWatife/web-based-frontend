@@ -58,7 +58,7 @@ const ProfileForm = () => {
     }
   };
 
-  const availableDepartments = formData.faculty ? DEPARTMENTS[formData.faculty] : [];
+  const availableDepartments = formData.faculty ? (DEPARTMENTS[formData.faculty] || []) : [];
 
   return (
     <div className="profile-form-container">
@@ -141,7 +141,7 @@ const ProfileForm = () => {
               className="form-select"
             >
               <option value="">Select Faculty</option>
-              {FACULTIES.map(faculty => (
+              {(FACULTIES || []).map(faculty => (
                 <option key={faculty} value={faculty}>{faculty}</option>
               ))}
             </select>
@@ -157,7 +157,7 @@ const ProfileForm = () => {
               disabled={!formData.faculty}
             >
               <option value="">Select Department</option>
-              {availableDepartments.map(dept => (
+              {(availableDepartments || []).map(dept => (
                 <option key={dept} value={dept}>{dept}</option>
               ))}
             </select>

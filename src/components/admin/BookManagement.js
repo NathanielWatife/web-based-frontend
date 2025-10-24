@@ -29,6 +29,9 @@ const BookManagement = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     loadBooks();
@@ -126,6 +129,9 @@ const BookManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+    setIsSaving(true);
     try {
       let payload;
       if (imageFile) {
@@ -146,18 +152,25 @@ const BookManagement = () => {
         setLoading(true);
         config.onUploadProgress = (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          // Could set a progress state here (add state below)
           setUploadProgress(percentCompleted);
         };
       }
 
       if (editingBook) {
         await bookService.updateBook(editingBook._id, payload, config);
+        setSuccessMessage('Book updated successfully');
       } else {
         await bookService.createBook(payload, config);
+        setSuccessMessage('Book added successfully');
       }
-      setShowForm(false);
-      setEditingBook(null);
+
+      // small delay so user sees success message briefly
+      setTimeout(() => {
+        setShowForm(false);
+        setEditingBook(null);
+        setSuccessMessage('');
+      }, 900);
+
       setFormData({
         title: '', author: '', isbn: '', description: '', price: '',
         category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
@@ -167,6 +180,11 @@ const BookManagement = () => {
       loadBooks();
     } catch (error) {
       console.error('Error saving book:', error);
+      const msg = error?.response?.data?.message || error.message || 'Failed to save book';
+      setErrorMessage(msg);
+    } finally {
+      setIsSaving(false);
+      setLoading(false);
     }
   };
 
@@ -233,6 +251,17 @@ const BookManagement = () => {
               <button onClick={resetForm} className="close-btn">×</button>
             </div>
             <form onSubmit={handleSubmit}>
+              {errorMessage && (
+                <div className="error-message" style={{ marginBottom: 12 }}>
+                  {errorMessage}
+                </div>
+              )}
+              {successMessage && (
+                <div className="success-message" style={{ marginBottom: 12 }}>
+                  {successMessage}
+                </div>
+              )}
+              <fieldset disabled={isSaving} style={{ border: 'none', padding: 0 }}>
               <div className="form-grid">
                 <div className="form-group">
                   <label className="form-label">Title *</label>
@@ -421,10 +450,11 @@ const BookManagement = () => {
                 <button type="button" onClick={resetForm} className="btn btn-outline">
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingBook ? 'Update Book' : 'Add Book'}
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? <LoadingSpinner size="small" /> : (editingBook ? 'Update Book' : 'Add Book')}
                 </button>
               </div>
+              </fieldset>
             </form>
           </div>
         </div>

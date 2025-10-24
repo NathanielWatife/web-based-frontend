@@ -19,7 +19,7 @@ const CartItem = ({ item }) => {
     <div className="cart-item">
       <div className="cart-item-image">
         <img 
-          src={item.image || '/placeholder-book.jpg'} 
+          src={item.imageUrl || item.image || '/placeholder-book.jpg'} 
           alt={item.title}
         />
       </div>

@@ -29,7 +29,7 @@ const OrderCard = ({ order }) => {
           <div key={index} className="preview-item">
             <div className="preview-image">
               <img 
-                src={item.book?.image || '/placeholder-book.jpg'} 
+                src={item.book?.imageUrl || item.book?.image || '/placeholder-book.jpg'} 
                 alt={item.book?.title}
               />
             </div>

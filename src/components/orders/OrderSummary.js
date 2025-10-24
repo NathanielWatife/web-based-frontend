@@ -27,7 +27,7 @@ const OrderSummary = ({ order }) => {
           <div key={index} className="order-item">
             <div className="item-image">
               <img 
-                src={item.book?.image || '/placeholder-book.jpg'} 
+                src={item.book?.imageUrl || item.book?.image || '/placeholder-book.jpg'} 
                 alt={item.book?.title}
               />
             </div>

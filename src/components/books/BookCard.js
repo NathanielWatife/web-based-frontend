@@ -15,11 +15,9 @@ const BookCard = ({ book }) => {
     <div className="book-card">
       <div className="book-image">
         <img 
-          src={book.image || '/placeholder-book.jpg'} 
+          src={book.imageUrl || book.image || '/placeholder-book.jpg'} 
           alt={book.title}
-          onError={(e) => {
-            e.target.src = '/placeholder-book.jpg';
-          }}
+          onError={(e) => { e.target.src = '/placeholder-book.jpg'; }}
         />
       </div>
       
