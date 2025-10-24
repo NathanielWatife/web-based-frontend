@@ -13,14 +13,23 @@ export const bookService = {
     return api.get('/books/categories');
   },
 
-  createBook: (bookData) => {
+  // bookData can be JSON or FormData. Optional config is forwarded to axios (useful for onUploadProgress).
+  createBook: (bookData, config = {}) => {
     const isForm = typeof FormData !== 'undefined' && bookData instanceof FormData;
-    return api.post('/books', bookData, isForm ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined);
+    const finalConfig = { ...config };
+    if (isForm) {
+      finalConfig.headers = { ...(finalConfig.headers || {}), 'Content-Type': 'multipart/form-data' };
+    }
+    return api.post('/books', bookData, finalConfig);
   },
 
-  updateBook: (id, bookData) => {
+  updateBook: (id, bookData, config = {}) => {
     const isForm = typeof FormData !== 'undefined' && bookData instanceof FormData;
-    return api.put(`/books/${id}`, bookData, isForm ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined);
+    const finalConfig = { ...config };
+    if (isForm) {
+      finalConfig.headers = { ...(finalConfig.headers || {}), 'Content-Type': 'multipart/form-data' };
+    }
+    return api.put(`/books/${id}`, bookData, finalConfig);
   },
 
   deleteBook: (id) => {

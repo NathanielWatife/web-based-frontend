@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '../../utils/cropImage';
 import { bookService } from '../../services/bookService';
 import { BOOK_CATEGORIES } from '../../utils/constants';
 import { formatCurrency } from '../../utils/helpers';
@@ -26,6 +28,7 @@ const BookManagement = () => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     loadBooks();
@@ -54,6 +57,35 @@ const BookManagement = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || null;
     setImageFile(file);
+  };
+
+  // Cropping state
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const ASPECT = 3 / 4; // width:height aspect ratio for book covers
+
+  const onCropComplete = (croppedArea, croppedAreaPx) => {
+    setCroppedAreaPixels(croppedAreaPx);
+  };
+
+  const applyCrop = async () => {
+    try {
+      if (!croppedAreaPixels || !previewUrl) return;
+      const croppedBlob = await getCroppedImg(previewUrl, croppedAreaPixels);
+      const croppedFile = new File([croppedBlob], imageFile?.name || 'cropped.jpg', { type: croppedBlob.type });
+      setImageFile(croppedFile);
+      setShowCropper(false);
+    } catch (err) {
+      console.error('Crop failed', err);
+    }
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    setPreviewUrl('');
   };
 
   const handleDragOver = (e) => {
@@ -108,10 +140,21 @@ const BookManagement = () => {
         payload = { ...formData };
       }
 
+      // Show upload progress when sending FormData
+      const config = {};
+      if (payload instanceof FormData) {
+        setLoading(true);
+        config.onUploadProgress = (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          // Could set a progress state here (add state below)
+          setUploadProgress(percentCompleted);
+        };
+      }
+
       if (editingBook) {
-        await bookService.updateBook(editingBook._id, payload);
+        await bookService.updateBook(editingBook._id, payload, config);
       } else {
-        await bookService.createBook(payload);
+        await bookService.createBook(payload, config);
       }
       setShowForm(false);
       setEditingBook(null);
@@ -120,6 +163,7 @@ const BookManagement = () => {
         category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
       });
       setImageFile(null);
+      setUploadProgress(0);
       loadBooks();
     } catch (error) {
       console.error('Error saving book:', error);
@@ -338,6 +382,10 @@ const BookManagement = () => {
                   {previewUrl ? (
                     <div className="image-preview">
                       <img src={previewUrl} alt="Preview" />
+                      <div style={{ marginTop: 8, display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <button type="button" className="btn btn-outline" onClick={() => setShowCropper(true)}>Crop</button>
+                        <button type="button" className="btn btn-outline" onClick={clearImage}>Remove</button>
+                      </div>
                     </div>
                   ) : (
                     <div className="dropzone-instructions">
@@ -349,6 +397,26 @@ const BookManagement = () => {
                 </div>
               </div>
 
+              {showCropper && previewUrl && (
+                <div className="form-group">
+                  <div style={{ position: 'relative', width: '100%', height: 400, background: '#333' }}>
+                    <Cropper
+                      image={previewUrl}
+                      crop={crop}
+                      zoom={zoom}
+                      aspect={ASPECT}
+                      onCropChange={setCrop}
+                      onZoomChange={setZoom}
+                      onCropComplete={onCropComplete}
+                    />
+                  </div>
+                  <div className="form-actions">
+                    <button type="button" className="btn btn-outline" onClick={() => setShowCropper(false)}>Cancel</button>
+                    <button type="button" className="btn btn-primary" onClick={applyCrop}>Apply Crop</button>
+                  </div>
+                </div>
+              )}
+
               <div className="form-actions">
                 <button type="button" onClick={resetForm} className="btn btn-outline">
                   Cancel
@@ -359,6 +427,15 @@ const BookManagement = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {uploadProgress > 0 && uploadProgress < 100 && (
+        <div style={{ padding: '0.5rem 1rem' }}>
+          <div style={{ height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'var(--primary-color)' }} />
+          </div>
+          <small>{uploadProgress}% uploaded</small>
         </div>
       )}
 
