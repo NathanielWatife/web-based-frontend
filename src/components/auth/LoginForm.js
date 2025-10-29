@@ -38,6 +38,14 @@ const LoginForm = ({ isAdmin = false }) => {
 
     if (result.success) {
       navigate(isAdmin ? '/admin/dashboard' : '/');
+    } else if (!isAdmin && result.needsVerification) {
+      navigate('/verify-email', {
+        state: {
+          matricNo: formData.matricNo,
+          email: result.email,
+          message: result.message || 'Please enter the 6-digit code we emailed to verify your account.'
+        }
+      });
     }
   };
 

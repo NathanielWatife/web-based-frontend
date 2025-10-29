@@ -61,11 +61,8 @@ api.interceptors.response.use(
       console.error(`API Error ${status}:`, data);
       
       if (status === 401) {
-        // Unauthorized - remove token and redirect to login
+        // Unauthorized - remove token; allow caller to decide navigation
         localStorage.removeItem('token');
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
       } else if (status === 403) {
         // Forbidden
         console.error('Access denied');

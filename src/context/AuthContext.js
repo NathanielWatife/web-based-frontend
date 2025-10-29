@@ -39,20 +39,37 @@ export const AuthProvider = ({ children }) => {
   const login = async (matricNo, password) => {
     try {
       setError('');
-  const response = await authService.login(matricNo, password);
-  const token = response.data?.data?.token;
-  // Persist token then verify token to get canonical user object (includes isVerified)
-  localStorage.setItem('token', token);
-  try {
-    const verifyResp = await authService.verifyToken(token);
-    const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
-    setUser(canonicalUser || null);
-  } catch (vErr) {
-    // If verify fails, still set basic user returned from login if available
-    const user = response.data?.data?.user;
-    setUser(user || null);
-  }
-      return { success: true };
+      const response = await authService.login(matricNo, password);
+      const token = response.data?.data?.token;
+      const basicUser = response.data?.data?.user;
+      // Persist token then verify token to get canonical user object (includes isVerified)
+      localStorage.setItem('token', token);
+      try {
+        const verifyResp = await authService.verifyToken(token);
+        const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
+        setUser(canonicalUser || null);
+        return { success: true };
+      } catch (vErr) {
+        const msg = vErr?.response?.data?.message;
+        // Unverified users will be rejected by verify-token; guide them to email verification
+        if (msg === 'Please verify your email address') {
+          localStorage.removeItem('token');
+          setUser(null);
+          setError(msg);
+          return {
+            success: false,
+            needsVerification: true,
+            matricNo,
+            email: basicUser?.email,
+            message: 'Please verify your email address to continue.'
+          };
+        }
+        // Other errors: fall back to generic handling
+        localStorage.removeItem('token');
+        setUser(null);
+        setError('Login failed');
+        return { success: false, error: 'Login failed' };
+      }
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed');
       return { success: false, error: error.response?.data?.message };
@@ -62,18 +79,20 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (email, password) => {
     try {
       setError('');
-  const response = await authService.adminLogin(email, password);
-  const token = response.data?.data?.token;
-  localStorage.setItem('token', token);
-  try {
-    const verifyResp = await authService.verifyToken(token);
-    const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
-    setUser(canonicalUser || null);
-  } catch (vErr) {
-    const user = response.data?.data?.user;
-    setUser(user || null);
-  }
-      return { success: true };
+      const response = await authService.adminLogin(email, password);
+      const token = response.data?.data?.token;
+      localStorage.setItem('token', token);
+      try {
+        const verifyResp = await authService.verifyToken(token);
+        const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
+        setUser(canonicalUser || null);
+        return { success: true };
+      } catch (vErr) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setError('Admin login failed');
+        return { success: false, error: 'Admin login failed' };
+      }
     } catch (error) {
       setError(error.response?.data?.message || 'Admin login failed');
       return { success: false, error: error.response?.data?.message };
