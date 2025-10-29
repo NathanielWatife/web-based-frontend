@@ -49,9 +49,13 @@ const RegisterForm = () => {
     setIsLoading(false);
 
     if (result.success) {
-      navigate('/login', {
+      // Navigate user to the email verification page with matricNo/email so they
+      // can enter the 6-digit code sent to their email.
+      navigate('/verify-email', {
         state: {
-          message: 'Registration successful! You can now log in.'
+          matricNo: submitData.matricNo,
+          email: submitData.email,
+          message: 'Registration successful! Enter the 6-digit code sent to your email to continue.'
         }
       });
     }

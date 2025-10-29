@@ -10,6 +10,7 @@ import BookDetails from './pages/BookDetails';
 import Login from './pages/Login';
 import AdminLogin from './pages/AdminLogin';
 import Register from './pages/Register';
+import EmailVerification from './components/auth/EmailVerification';
 import Cart from './components/cart/Cart';
 import Checkout from './pages/Checkout';
 import OrderHistory from './pages/OrderHistory';
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/reset-password" element={<PasswordReset />} />
 
                 {/* Protected Routes */}

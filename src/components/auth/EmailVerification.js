@@ -11,7 +11,7 @@ const EmailVerification = () => {
   const [countdown, setCountdown] = useState(0);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const { user } = useAuth();
+  const { user, authenticateWithToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
@@ -66,9 +66,19 @@ const EmailVerification = () => {
         return;
       }
       const response = await authService.verifyEmail(pendingMatricNo, code);
-      setMessage('Email verified successfully!');
-      // After successful verification, navigate to login for sign-in
-      setTimeout(() => navigate('/login', { state: { message: 'Email verified! You can now log in.' } }), 1000);
+
+      setMessage('Email verified successfully! Redirecting...');
+
+      const token = response?.data?.data?.token || response?.data?.token;
+
+      if (token) {
+        // Persist token and set canonical user in context, then navigate into app
+        await authenticateWithToken(token);
+        setTimeout(() => navigate('/', { state: { message: 'Welcome — your email is verified.' } }), 700);
+      } else {
+        // Fallback: go to login so user can sign-in manually
+        setTimeout(() => navigate('/login', { state: { message: 'Email verified! You can now log in.' } }), 1000);
+      }
     } catch (error) {
       setError(error.response?.data?.message || 'Verification failed');
     } finally {

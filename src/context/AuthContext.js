@@ -96,6 +96,21 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Authenticate using a token (used after email verification)
+  const authenticateWithToken = async (token) => {
+    try {
+      localStorage.setItem('token', token);
+      const verifyResp = await authService.verifyToken(token);
+      const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
+      setUser(canonicalUser || null);
+      return { success: true };
+    } catch (err) {
+      localStorage.removeItem('token');
+      setUser(null);
+      return { success: false };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -103,6 +118,7 @@ export const AuthProvider = ({ children }) => {
     login,
     adminLogin,
     register,
+    authenticateWithToken,
     logout,
     setError,
     isAuthenticated: !!user,
