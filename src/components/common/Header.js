@@ -5,7 +5,7 @@ import { useCart } from '../../context/CartContext';
 import '../../styles/Header.css';
 
 const Header = () => {
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const { getCartItemsCount } = useCart();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
