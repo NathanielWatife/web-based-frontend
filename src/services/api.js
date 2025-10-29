@@ -6,7 +6,7 @@ const rawBase = process.env.REACT_APP_API_URL;
 if (!rawBase) {
   // Crash early with a clear message to avoid silent misroutes
   throw new Error(
-    'REACT_APP_API_URL is not set. Configure it to your backend base URL (e.g., https://yababookshop-api.onrender.com).'
+    'REACT_APP_API_URL is not set. Please set it to the backend API base URL.'
   );
 }
 
@@ -17,7 +17,7 @@ const API_BASE_URL = (() => {
 })();
 
 // Create axios instance with default configuration
-const DEFAULT_TIMEOUT_MS = Number(process.env.REACT_APP_API_TIMEOUT || 20000); // default 20s to handle cold starts
+const DEFAULT_TIMEOUT_MS = Number(process.env.REACT_APP_API_TIMEOUT || 50000); // default 50s to handle cold starts
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

@@ -25,14 +25,11 @@ export const authService = {
 
   adminLogin: (email, password) => {
     return api.post('/auth/admin/login', { email, password });
+  },
+  verifyEmail : (matricNo, verificationCode) => {
+    return api.post('/auth/verify-email', { matricNo, verificationCode });
+  },
+  resendVerification: (matricNo) => {
+    return api.post('/auth/resend-verification', { matricNo });
   }
-};
-
-// Email verification endpoints
-authService.verifyEmail = (matricNo, verificationCode) => {
-  return api.post('/auth/verify-email', { matricNo, verificationCode });
-};
-
-authService.resendVerification = (matricNo) => {
-  return api.post('/auth/resend-verification', { matricNo });
 };
