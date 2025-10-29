@@ -41,10 +41,17 @@ export const AuthProvider = ({ children }) => {
       setError('');
   const response = await authService.login(matricNo, password);
   const token = response.data?.data?.token;
-  const user = response.data?.data?.user;
-
-      localStorage.setItem('token', token);
-      setUser(user);
+  // Persist token then verify token to get canonical user object (includes isVerified)
+  localStorage.setItem('token', token);
+  try {
+    const verifyResp = await authService.verifyToken(token);
+    const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
+    setUser(canonicalUser || null);
+  } catch (vErr) {
+    // If verify fails, still set basic user returned from login if available
+    const user = response.data?.data?.user;
+    setUser(user || null);
+  }
       return { success: true };
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed');
@@ -57,10 +64,15 @@ export const AuthProvider = ({ children }) => {
       setError('');
   const response = await authService.adminLogin(email, password);
   const token = response.data?.data?.token;
-  const user = response.data?.data?.user;
-
-      localStorage.setItem('token', token);
-      setUser(user);
+  localStorage.setItem('token', token);
+  try {
+    const verifyResp = await authService.verifyToken(token);
+    const canonicalUser = verifyResp.data?.data?.user || verifyResp.data?.user;
+    setUser(canonicalUser || null);
+  } catch (vErr) {
+    const user = response.data?.data?.user;
+    setUser(user || null);
+  }
       return { success: true };
     } catch (error) {
       setError(error.response?.data?.message || 'Admin login failed');
