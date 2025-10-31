@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { FACULTIES, DEPARTMENTS } from '../../utils/constants';
+import { FACULTIES, DEPARTMENTS, STUDENT_LEVELS } from '../../utils/constants';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/AuthForms.css';
 
@@ -17,6 +17,7 @@ const RegisterForm = () => {
     faculty: '',
     department: '',
     programme: 'National Diploma',
+    level: 'ND1',
     admissionYear: new Date().getFullYear().toString()
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +63,9 @@ const RegisterForm = () => {
   };
 
   const availableDepartments = formData.faculty ? DEPARTMENTS[formData.faculty] : [];
+  const filteredLevels = formData.programme === 'Higher National Diploma' 
+    ? STUDENT_LEVELS.filter(l => l.startsWith('HND'))
+    : STUDENT_LEVELS.filter(l => l.startsWith('ND'));
 
   return (
     <div className="auth-container">
@@ -173,6 +177,21 @@ const RegisterForm = () => {
               >
                 <option value="National Diploma">National Diploma</option>
                 <option value="Higher National Diploma">Higher National Diploma</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Level</label>
+              <select
+                name="level"
+                value={formData.level}
+                onChange={handleChange}
+                className="form-select"
+                required
+              >
+                {filteredLevels.map(level => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
               </select>
             </div>
 

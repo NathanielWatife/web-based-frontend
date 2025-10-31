@@ -3,6 +3,8 @@ import { bookService } from '../../services/bookService';
 import BookCard from './BookCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/BookList.css';
+import RecommendedBooks from './RecommendedBooks';
+import { useAuth } from '../../context/AuthContext';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -12,8 +14,11 @@ const BookList = () => {
     category: '',
     search: '',
     minPrice: '',
-    maxPrice: ''
+    maxPrice: '',
+    forMyLevel: false
   });
+
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     loadBooks();
@@ -28,6 +33,10 @@ const BookList = () => {
       if (filters.search) params.search = filters.search;
       if (filters.minPrice) params.minPrice = filters.minPrice;
       if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+
+      if (filters.forMyLevel && isAuthenticated && user?.level) {
+        params.level = user.level;
+      }
 
   const response = await bookService.getAllBooks(params);
   const list = Array.isArray(response.data?.data) ? response.data.data : [];
@@ -75,6 +84,11 @@ const BookList = () => {
 
   return (
     <div className="book-list-container">
+      {isAuthenticated && (
+        <div style={{ marginBottom: 24 }}>
+          <RecommendedBooks title="Top picks for your level" />
+        </div>
+      )}
       <div className="filters-section">
         <div className="search-box">
           <input
@@ -115,6 +129,16 @@ const BookList = () => {
             onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
             className="form-input"
           />
+
+          <label className="checkbox" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={filters.forMyLevel}
+              onChange={(e) => handleFilterChange('forMyLevel', e.target.checked)}
+              disabled={!isAuthenticated || !user?.level}
+            />
+            <span>Show books for my level</span>
+          </label>
         </div>
       </div>
 

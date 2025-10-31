@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '../../utils/cropImage';
 import { bookService } from '../../services/bookService';
-import { BOOK_CATEGORIES } from '../../utils/constants';
+import { BOOK_CATEGORIES, STUDENT_LEVELS } from '../../utils/constants';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/AdminManagement.css';
@@ -22,6 +22,7 @@ const BookManagement = () => {
     courseCode: '',
     faculty: '',
     stockQuantity: '',
+    targetLevels: [],
     imageUrl: ''
   });
   const [imageFile, setImageFile] = useState(null);
@@ -55,6 +56,11 @@ const BookManagement = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleMultiSelectChange = (e) => {
+    const options = Array.from(e.target.selectedOptions).map(o => o.value);
+    setFormData(prev => ({ ...prev, targetLevels: options }));
   };
 
   const handleFileChange = (e) => {
@@ -140,6 +146,7 @@ const BookManagement = () => {
         Object.entries(formData).forEach(([key, value]) => {
           if (value !== undefined && value !== null) payload.append(key, value);
         });
+        (formData.targetLevels || []).forEach(lvl => payload.append('targetLevels[]', lvl));
         payload.append('image', imageFile);
       } else {
         // Fallback to JSON when no image file selected (uses imageUrl if provided)
@@ -173,7 +180,7 @@ const BookManagement = () => {
 
       setFormData({
         title: '', author: '', isbn: '', description: '', price: '',
-        category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
+        category: '', courseCode: '', faculty: '', stockQuantity: '', targetLevels: [], imageUrl: ''
       });
       setImageFile(null);
       setUploadProgress(0);
@@ -200,6 +207,7 @@ const BookManagement = () => {
       courseCode: book.courseCode || '',
       faculty: book.faculty || '',
       stockQuantity: book.stockQuantity,
+      targetLevels: book.targetLevels || [],
       imageUrl: book.imageUrl || ''
     });
     setImageFile(null);
@@ -222,7 +230,7 @@ const BookManagement = () => {
     setEditingBook(null);
     setFormData({
       title: '', author: '', isbn: '', description: '', price: '',
-      category: '', courseCode: '', faculty: '', stockQuantity: '', imageUrl: ''
+      category: '', courseCode: '', faculty: '', stockQuantity: '', targetLevels: [], imageUrl: ''
     });
     setImageFile(null);
   };
@@ -374,6 +382,22 @@ const BookManagement = () => {
                   className="form-input"
                   rows="3"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Target Levels</label>
+                <select
+                  multiple
+                  name="targetLevels"
+                  value={formData.targetLevels}
+                  onChange={handleMultiSelectChange}
+                  className="form-select"
+                >
+                  {STUDENT_LEVELS.map(level => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+                <small className="form-help">Hold Ctrl/Cmd to select multiple levels. Leave empty to make available to all students.</small>
               </div>
 
               <div className="form-group">

@@ -47,6 +47,8 @@ export const BOOK_CATEGORIES = [
   'Environmental Studies'
 ];
 
+export const STUDENT_LEVELS = ['ND1', 'ND2', 'HND1', 'HND2'];
+
 export const ORDER_STATUS = {
   pending: { label: 'Pending', color: '#f59e0b' },
   confirmed: { label: 'Confirmed', color: '#3b82f6' },

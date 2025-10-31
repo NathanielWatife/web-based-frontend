@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import RecommendedBooks from '../components/books/RecommendedBooks';
 import '../styles/Home.css';
 
 const Home = () => {
@@ -96,6 +97,15 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Personalized recommendations for logged-in students */}
+      {isAuthenticated && (
+        <section>
+          <div className="container">
+            <RecommendedBooks />
+          </div>
+        </section>
+      )}
     </div>
   );
 };

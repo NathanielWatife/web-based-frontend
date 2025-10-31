@@ -13,6 +13,10 @@ export const bookService = {
     return api.get('/books/categories');
   },
 
+  getRecommended: (params = {}) => {
+    return api.get('/books/recommended', { params });
+  },
+
   // bookData can be JSON or FormData. Optional config is forwarded to axios (useful for onUploadProgress).
   createBook: (bookData, config = {}) => {
     const isForm = typeof FormData !== 'undefined' && bookData instanceof FormData;

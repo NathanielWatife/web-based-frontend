@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { FACULTIES, DEPARTMENTS } from '../../utils/constants';
+import { FACULTIES, DEPARTMENTS, STUDENT_LEVELS } from '../../utils/constants';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/ProfileForm.css';
 
@@ -13,7 +13,9 @@ const ProfileForm = () => {
     phoneNumber: '',
     faculty: '',
     department: '',
-    matricNo: ''
+    matricNo: '',
+    programme: '',
+    level: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -28,7 +30,9 @@ const ProfileForm = () => {
         phoneNumber: user.phoneNumber || '',
         faculty: user.faculty || '',
         department: user.department || '',
-        matricNo: user.matricNo || ''
+        matricNo: user.matricNo || '',
+        programme: user.programme || '',
+        level: user.level || ''
       });
     }
   }, [user]);
@@ -59,6 +63,9 @@ const ProfileForm = () => {
   };
 
   const availableDepartments = formData.faculty ? (DEPARTMENTS[formData.faculty] || []) : [];
+  const filteredLevels = (formData.programme === 'Higher National Diploma')
+    ? STUDENT_LEVELS.filter(l => l.startsWith('HND'))
+    : STUDENT_LEVELS.filter(l => l.startsWith('ND'));
 
   return (
     <div className="profile-form-container">
@@ -129,6 +136,35 @@ const ProfileForm = () => {
             title="Matriculation number cannot be changed"
           />
           <small className="form-help">Matriculation number cannot be changed</small>
+        </div>
+
+        <div className="form-grid">
+          <div className="form-group">
+            <label className="form-label">Programme</label>
+            <input
+              type="text"
+              name="programme"
+              value={formData.programme}
+              className="form-input"
+              disabled
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Level</label>
+            <select
+              name="level"
+              value={formData.level}
+              onChange={handleChange}
+              className="form-select"
+              disabled
+            >
+              <option value="">Select Level</option>
+              {filteredLevels.map(level => (
+                <option key={level} value={level}>{level}</option>
+              ))}
+            </select>
+            <small className="form-help">Level is set during registration.</small>
+          </div>
         </div>
 
         <div className="form-grid">
