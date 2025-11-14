@@ -36,6 +36,8 @@ const LoginForm = ({ isAdmin = false }) => {
 
     setIsLoading(false);
 
+    setFormData(prev => ({ ...prev, password: '' }));
+
     if (result.success) {
       navigate(isAdmin ? '/admin/dashboard' : '/');
     } else if (!isAdmin && result.needsVerification) {
@@ -72,6 +74,7 @@ const LoginForm = ({ isAdmin = false }) => {
                 className="form-input"
                 placeholder="e.g., F/ND/23/3210090"
                 required
+                autoComplete="username"
               />
             </div>
           ) : (
@@ -85,6 +88,7 @@ const LoginForm = ({ isAdmin = false }) => {
                 className="form-input"
                 placeholder="admin@yabatech.edu.ng"
                 required
+                autoComplete="email"
               />
             </div>
           )}
@@ -99,6 +103,7 @@ const LoginForm = ({ isAdmin = false }) => {
               className="form-input"
               placeholder="Enter your password"
               required
+              autoComplete="current-password"
             />
           </div>
 

@@ -4,6 +4,20 @@ import { ORDER_STATUS } from '../../utils/constants';
 import '../../styles/OrderSummary.css';
 
 const OrderSummary = ({ order }) => {
+  if (!order) {
+    return (
+      <div className="order-summary">
+        <h3>Order Summary</h3>
+        <p>No order information available.</p>
+      </div>
+    );
+  }
+
+  const statusMeta = ORDER_STATUS[order.status] || {
+    color: '#6b7280',
+    label: order.status ? order.status : 'Unknown',
+  };
+
   return (
     <div className="order-summary">
       <div className="order-header">
@@ -14,16 +28,16 @@ const OrderSummary = ({ order }) => {
         <div className="order-status">
           <span 
             className="status-badge"
-            style={{ backgroundColor: ORDER_STATUS[order.status].color }}
+            style={{ backgroundColor: statusMeta.color }}
           >
-            {ORDER_STATUS[order.status].label}
+            {statusMeta.label}
           </span>
         </div>
       </div>
 
       <div className="order-items">
-        <h4>Items ({order.items.length})</h4>
-        {order.items.map((item, index) => (
+        <h4>Items ({order.items?.length || 0})</h4>
+        {(order.items || []).map((item, index) => (
           <div key={index} className="order-item">
             <div className="item-image">
               <img 
@@ -46,7 +60,7 @@ const OrderSummary = ({ order }) => {
       <div className="order-totals">
         <div className="total-row">
           <span>Subtotal:</span>
-          <span>{formatCurrency(order.totalAmount)}</span>
+          <span>{formatCurrency(order.totalAmount || 0)}</span>
         </div>
         <div className="total-row">
           <span>Shipping:</span>
@@ -54,7 +68,7 @@ const OrderSummary = ({ order }) => {
         </div>
         <div className="total-row grand-total">
           <span>Total:</span>
-          <span>{formatCurrency(order.totalAmount)}</span>
+          <span>{formatCurrency(order.totalAmount || 0)}</span>
         </div>
       </div>
 
