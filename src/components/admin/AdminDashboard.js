@@ -159,6 +159,10 @@ const AdminDashboard = () => {
             <span className="action-icon">📊</span>
             <span>View Reports</span>
           </button>
+          <button className="action-btn" onClick={() => navigate('/admin/tickets')}>
+            <span className="action-icon">💬</span>
+            <span>Support Tickets</span>
+          </button>
         </div>
       </div>
     </div>

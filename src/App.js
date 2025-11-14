@@ -23,6 +23,8 @@ import UserManagement from './components/admin/UserManagement';
 import Reports from './components/admin/Reports';
 import PasswordReset from './components/auth/PasswordReset';
 import './styles/index.css';
+import Chatbot from './components/common/Chatbot';
+import SupportTickets from './components/admin/SupportTickets';
 
 function App() {
   return (
@@ -56,8 +58,10 @@ function App() {
                 <Route path="/admin/orders" element={<OrderManagement />} />
                 <Route path="/admin/users" element={<UserManagement />} />
                 <Route path="/admin/reports" element={<Reports />} />
+                <Route path="/admin/tickets" element={<SupportTickets />} />
               </Routes>
             </main>
+            <Chatbot />
             <Footer />
           </div>
         </CartProvider>
