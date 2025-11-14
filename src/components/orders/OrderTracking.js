@@ -11,7 +11,18 @@ const OrderTracking = ({ order }) => {
     { key: 'completed', label: 'Completed' }
   ];
 
+  if (!order) {
+    return (
+      <div className="order-tracking">
+        <h3>Order Tracking</h3>
+        <p>No order data available.</p>
+      </div>
+    );
+  }
+
   const currentStatusIndex = statusSteps.findIndex(step => step.key === order.status);
+
+  const currentStatus = ORDER_STATUS[order.status] || { color: '#6b7280', label: order.status || 'Unknown' };
 
   return (
     <div className="order-tracking">
@@ -45,16 +56,16 @@ const OrderTracking = ({ order }) => {
           <strong>Order ID:</strong> {order.orderId}
         </div>
         <div className="detail-item">
-          <strong>Current Status:</strong> 
-          <span 
+          <strong>Current Status:</strong>
+          <span
             className="status-badge"
-            style={{ backgroundColor: ORDER_STATUS[order.status].color }}
+            style={{ backgroundColor: currentStatus.color }}
           >
-            {ORDER_STATUS[order.status].label}
+            {currentStatus.label}
           </span>
         </div>
         <div className="detail-item">
-          <strong>Last Updated:</strong> {new Date(order.updatedAt).toLocaleString()}
+          <strong>Last Updated:</strong> {new Date(order.updatedAt || order.createdAt || Date.now()).toLocaleString()}
         </div>
         {order.deliveryOption === 'pickup' && (
           <div className="detail-item">
