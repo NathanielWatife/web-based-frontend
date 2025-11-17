@@ -1,4 +1,5 @@
 import axios from 'axios';
+import NProgress from 'nprogress';
 import { log } from '../utils/logger';
 
 // Use backend URL from env only; no localhost fallback in production builds.
@@ -28,10 +29,14 @@ const api = axios.create({
   withCredentials: false,
 });
 
+let activeRequests = 0;
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     log.info(`HTTP → ${config.method?.toUpperCase()} ${config.url}`);
+    if (activeRequests === 0) NProgress.start();
+    activeRequests += 1;
     
     const token = localStorage.getItem('token');
     if (token) {
@@ -42,6 +47,8 @@ api.interceptors.request.use(
   },
   (error) => {
     log.error('Request error:', error);
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) setTimeout(() => NProgress.done(), 150);
     return Promise.reject(error);
   }
 );
@@ -50,10 +57,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     log.info(`HTTP ← ${response.status} ${response.config.url}`);
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) setTimeout(() => NProgress.done(), 150);
     return response;
   },
   (error) => {
     log.error('Response error:', error);
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) setTimeout(() => NProgress.done(), 150);
     
     if (error.response) {
       // Server responded with error status

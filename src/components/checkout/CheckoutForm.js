@@ -6,6 +6,7 @@ import { orderService } from '../../services/orderService';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/CheckoutForm.css';
+import { toast } from 'react-hot-toast';
 
 const CheckoutForm = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
@@ -51,12 +52,14 @@ const CheckoutForm = () => {
       
       // Clear cart and redirect to order confirmation
       clearCart();
+      toast.success('Order placed successfully!');
       navigate(`/orders/${response.data._id}`, { 
         state: { message: 'Order placed successfully!' }
       });
       
     } catch (error) {
       setError(error.response?.data?.message || 'Failed to place order');
+      toast.error(error.response?.data?.message || 'Failed to place order');
     } finally {
       setIsProcessing(false);
     }

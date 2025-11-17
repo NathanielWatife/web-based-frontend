@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { bookService } from '../../services/bookService';
 import BookCard from './BookCard';
 import LoadingSpinner from '../common/LoadingSpinner';
+import BookCardSkeleton from './BookCardSkeleton';
 import '../../styles/BookList.css';
 import RecommendedBooks from './RecommendedBooks';
 import { useAuth } from '../../context/AuthContext';
@@ -59,7 +60,25 @@ const BookList = () => {
   if (loading) {
     return (
       <div className="book-list-container">
-        <LoadingSpinner size="large" />
+        <div className="filters-section" style={{ opacity: 0.6 }}>
+          <div className="search-box">
+            <input type="text" className="form-input" placeholder="Search books..." disabled />
+          </div>
+          <div className="filter-controls">
+            <select className="form-select" disabled><option>Loading…</option></select>
+            <input type="number" className="form-input" placeholder="Min Price" disabled />
+            <input type="number" className="form-input" placeholder="Max Price" disabled />
+            <label className="checkbox" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input type="checkbox" disabled />
+              <span>Show books for my level</span>
+            </label>
+          </div>
+        </div>
+        <div className="books-grid">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <BookCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

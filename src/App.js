@@ -29,6 +29,9 @@ import PrivateRoute from './components/common/PrivateRoute';
 import AdminRoute from './components/common/AdminRoute';
 import { Toaster } from 'react-hot-toast';
 import ActionPopup from './components/common/ActionPopup';
+import ScrollToTop from './components/common/ScrollToTop';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import RouteProgress from './components/common/RouteProgress';
 
 function App() {
   return (
@@ -38,8 +41,11 @@ function App() {
           <div className="App">
             <Toaster position="top-center" gutter={8} />
             <Header />
-            <main>
-              <Routes>
+            <RouteProgress />
+            <ScrollToTop />
+            <ErrorBoundary>
+              <main>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/books" element={<Books />} />
@@ -64,8 +70,9 @@ function App() {
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
                 <Route path="/admin/reports" element={<AdminRoute><Reports /></AdminRoute>} />
                 <Route path="/admin/tickets" element={<AdminRoute><SupportTickets /></AdminRoute>} />
-              </Routes>
-            </main>
+                </Routes>
+              </main>
+            </ErrorBoundary>
             <ActionPopup />
             <Chatbot />
             <Footer />

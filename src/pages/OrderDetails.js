@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import OrderSummary from '../components/orders/OrderSummary';
 import OrderTracking from '../components/orders/OrderTracking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { toast } from 'react-hot-toast';
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -12,11 +13,33 @@ const OrderDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  const prevStatus = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated && id) {
       loadOrder();
     }
+  }, [isAuthenticated, id]);
+
+  // Lightweight polling to detect status changes and trigger toasts
+  useEffect(() => {
+    if (!isAuthenticated || !id) return;
+    const interval = setInterval(async () => {
+      try {
+        const response = await orderService.getOrder(id);
+        setOrder((prev) => {
+          // Only update if something actually changed
+          if (!prev || JSON.stringify(prev) !== JSON.stringify(response.data)) {
+            return response.data;
+          }
+          return prev;
+        });
+      } catch (e) {
+        // silent on polling errors
+      }
+    }, 15000);
+    return () => clearInterval(interval);
   }, [isAuthenticated, id]);
 
   const loadOrder = async () => {
@@ -30,6 +53,25 @@ const OrderDetails = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (location.state && location.state.message) {
+      toast.success(location.state.message);
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (order && order.status) {
+      if (prevStatus.current && prevStatus.current !== order.status) {
+        const formatted = String(order.status)
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+        toast.success(`Order status updated to ${formatted}`);
+      }
+      prevStatus.current = order.status;
+    }
+  }, [order?.status]);
 
   if (!isAuthenticated) {
     return (
