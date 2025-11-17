@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { log } from '../utils/logger';
 
 // Use backend URL from env only; no localhost fallback in production builds.
 const rawBase = process.env.REACT_APP_API_URL;
@@ -30,7 +31,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    console.log(`Making ${config.method?.toUpperCase()} request to: ${config.url}`);
+    log.info(`HTTP → ${config.method?.toUpperCase()} ${config.url}`);
     
     const token = localStorage.getItem('token');
     if (token) {
@@ -40,7 +41,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
+    log.error('Request error:', error);
     return Promise.reject(error);
   }
 );
@@ -48,43 +49,43 @@ api.interceptors.request.use(
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => {
-    console.log(`Response received: ${response.status} from ${response.config.url}`);
+    log.info(`HTTP ← ${response.status} ${response.config.url}`);
     return response;
   },
   (error) => {
-    console.error('Response error:', error);
+    log.error('Response error:', error);
     
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
       
-      console.error(`API Error ${status}:`, data);
+      log.error(`API Error ${status}:`, data);
       
       if (status === 401) {
         // Unauthorized - remove token; allow caller to decide navigation
         localStorage.removeItem('token');
       } else if (status === 403) {
         // Forbidden
-        console.error('Access denied');
+        log.warn('Access denied');
       } else if (status === 404) {
         // Not found
-        console.error('Resource not found');
+        log.warn('Resource not found');
       } else if (status >= 500) {
         // Server error
-        console.error('Server error occurred');
+        log.error('Server error occurred');
       }
     } else if (error.request) {
       // Request was made but no response received
-      console.error('No response received:', error.request);
+      log.error('No response received:', error.request);
       
       if (error.code === 'ECONNABORTED') {
-        console.error('Request timeout');
+        log.warn('Request timeout');
       } else if (error.message === 'Network Error') {
-        console.error('Network error - please check your connection');
+        log.warn('Network error - please check your connection');
       }
     } else {
       // Something else happened
-      console.error('Error setting up request:', error.message);
+      log.error('Error setting up request:', error.message);
     }
     
     return Promise.reject(error);

@@ -12,6 +12,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [actionPopup, setActionPopup] = useState({ show: false, title: '', message: '' });
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -38,10 +39,25 @@ export const CartProvider = ({ children }) => {
         return [...prevItems, { ...book, quantity }];
       }
     });
+
+    setActionPopup({
+      show: true,
+      title: 'Added to Cart',
+      message: `${book.title} ${quantity > 1 ? `× ${quantity}` : ''}`.trim()
+    });
+    setTimeout(() => setActionPopup({ show: false }), 3000);
   };
 
   const removeFromCart = (bookId) => {
     setCartItems(prevItems => prevItems.filter(item => item._id !== bookId));
+
+    const removed = cartItems.find(i => i._id === bookId);
+    setActionPopup({
+      show: true,
+      title: 'Removed from Cart',
+      message: removed ? removed.title : 'Item removed'
+    });
+    setTimeout(() => setActionPopup({ show: false }), 3000);
   };
 
   const updateQuantity = (bookId, quantity) => {
@@ -76,7 +92,8 @@ export const CartProvider = ({ children }) => {
     updateQuantity,
     clearCart,
     getCartTotal,
-    getCartItemsCount
+    getCartItemsCount,
+    actionPopup
   };
 
   return (

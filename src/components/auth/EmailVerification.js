@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import LoadingSpinner from '../common/LoadingSpinner';
+import FullScreenLoader from '../common/FullScreenLoader';
+import toast from 'react-hot-toast';
 import '../../styles/EmailVerification.css';
 
 const EmailVerification = () => {
@@ -10,6 +12,7 @@ const EmailVerification = () => {
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [message, setMessage] = useState('');
+  const [showOverlay, setShowOverlay] = useState(false);
   const [error, setError] = useState('');
   const { user, authenticateWithToken } = useAuth();
   const location = useLocation();
@@ -48,8 +51,7 @@ const EmailVerification = () => {
     }
   };
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
+  const performVerify = async () => {
     const code = verificationCode.join('');
     
     if (code.length !== 6) {
@@ -68,21 +70,61 @@ const EmailVerification = () => {
       const response = await authService.verifyEmail(pendingMatricNo, code);
 
       setMessage('Email verified successfully! Redirecting...');
+      toast.success('Email verified! Redirecting…');
 
       const token = response?.data?.data?.token || response?.data?.token;
 
       if (token) {
         // Persist token and set canonical user in context, then navigate into app
         await authenticateWithToken(token);
-        setTimeout(() => navigate('/', { state: { message: 'Welcome — your email is verified.' } }), 700);
+        setShowOverlay(true);
+        navigate('/', { state: { message: 'Welcome — your email is verified.' } });
       } else {
         // Fallback: go to login so user can sign-in manually
-        setTimeout(() => navigate('/login', { state: { message: 'Email verified! You can now log in.' } }), 1000);
+        setShowOverlay(true);
+        navigate('/login', { state: { message: 'Email verified! You can now log in.' } });
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Verification failed');
+      const msg = error.response?.data?.message || 'Verification failed';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (!loading) await performVerify();
+  };
+
+  // Auto-submit when 6 digits are entered
+  useEffect(() => {
+    const code = verificationCode.join('');
+    if (code.length === 6 && !loading) {
+      // slight delay to allow last keystroke to render
+      const t = setTimeout(() => {
+        performVerify();
+      }, 100);
+      return () => clearTimeout(t);
+    }
+  }, [verificationCode, loading]);
+
+  // Paste handler to fill all boxes if user pastes a 6-digit code
+  const handlePaste = (index, e) => {
+    const pasted = e.clipboardData.getData('text');
+    if (/^\d{2,}$/.test(pasted)) {
+      e.preventDefault();
+      const digits = pasted.replace(/\D/g, '').slice(0, 6).split('');
+      const newCode = [...verificationCode];
+      for (let i = 0; i < digits.length; i++) {
+        const pos = index + i;
+        if (pos < 6) newCode[pos] = digits[i];
+      }
+      setVerificationCode(newCode);
+      const nextPos = Math.min(index + digits.length, 5);
+      const nextInput = document.getElementById(`verification-${nextPos}`);
+      if (nextInput) nextInput.focus();
     }
   };
 
@@ -107,6 +149,7 @@ const EmailVerification = () => {
   };
   return (
     <div className="email-verification">
+      <FullScreenLoader show={showOverlay} text="Setting up your account…" />
       <div className="verification-card">
         <h2>Verify Your Email</h2>
         <p>We've sent a 6-digit verification code to your email address{pendingEmail ? ` (${pendingEmail})` : ''}</p>
@@ -139,6 +182,7 @@ const EmailVerification = () => {
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="code-input"
                 disabled={loading}
+                onPaste={(e) => handlePaste(index, e)}
               />
             ))}
           </div>

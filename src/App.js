@@ -25,6 +25,10 @@ import PasswordReset from './components/auth/PasswordReset';
 import './styles/index.css';
 import Chatbot from './components/common/Chatbot';
 import SupportTickets from './components/admin/SupportTickets';
+import PrivateRoute from './components/common/PrivateRoute';
+import AdminRoute from './components/common/AdminRoute';
+import { Toaster } from 'react-hot-toast';
+import ActionPopup from './components/common/ActionPopup';
 
 function App() {
   return (
@@ -32,6 +36,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <div className="App">
+            <Toaster position="top-center" gutter={8} />
             <Header />
             <main>
               <Routes>
@@ -46,21 +51,22 @@ function App() {
                 <Route path="/reset-password" element={<PasswordReset />} />
 
                 {/* Protected Routes */}
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/orders" element={<OrderHistory />} />
-                <Route path="/orders/:id" element={<OrderDetails />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+                <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+                <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+                <Route path="/orders/:id" element={<PrivateRoute><OrderDetails /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
                 {/* Admin Routes */}
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/books" element={<BookManagement />} />
-                <Route path="/admin/orders" element={<OrderManagement />} />
-                <Route path="/admin/users" element={<UserManagement />} />
-                <Route path="/admin/reports" element={<Reports />} />
-                <Route path="/admin/tickets" element={<SupportTickets />} />
+                <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/books" element={<AdminRoute><BookManagement /></AdminRoute>} />
+                <Route path="/admin/orders" element={<AdminRoute><OrderManagement /></AdminRoute>} />
+                <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+                <Route path="/admin/reports" element={<AdminRoute><Reports /></AdminRoute>} />
+                <Route path="/admin/tickets" element={<AdminRoute><SupportTickets /></AdminRoute>} />
               </Routes>
             </main>
+            <ActionPopup />
             <Chatbot />
             <Footer />
           </div>
