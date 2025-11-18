@@ -50,8 +50,7 @@ const RegisterForm = () => {
     setIsLoading(false);
 
     if (result.success) {
-      // Navigate user to the email verification page with matricNo/email so they
-      // can enter the 6-digit code sent to their email.
+      // Navigate user to the email verification page with matricNo/email
       navigate('/verify-email', {
         state: {
           matricNo: submitData.matricNo,
@@ -70,8 +69,6 @@ const RegisterForm = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Student Registration</h2>
-        
         {error && (
           <div className="error-message">
             {error}
