@@ -1,59 +1,128 @@
 import api from './api';
 
 export const paymentService = {
+  /**
+   * Initialize payment through backend
+   * Backend will return authorization URL for the chosen gateway
+   */
   initializePayment: (paymentData) => {
     return api.post('/payments/initialize', paymentData);
   },
 
+  /**
+   * Verify payment after user completes transaction
+   */
   verifyPayment: (reference) => {
     return api.get(`/payments/verify/${reference}`);
   },
 
-  // Paystack integration
-  initializePaystack: (email, amount, reference, metadata = {}) => {
-    const handler = window.PaystackPop && window.PaystackPop.setup({
-      key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
-      email,
-      amount: amount * 100, // Convert to kobo
-      reference,
-      metadata,
-      onClose: () => {
-        console.log('Payment window closed.');
-      },
-      callback: (response) => {
-        return response;
-      }
-    });
-    
-    if (handler) {
-      handler.openIframe();
-    }
+  /**
+   * List saved payment methods for user
+   */
+  listPaymentMethods: () => {
+    return api.get('/payments/methods');
   },
 
-  // Flutterwave integration
-  initializeFlutterwave: (email, amount, reference, metadata = {}) => {
+  /**
+   * Delete a saved payment method
+   */
+  deletePaymentMethod: (methodId) => {
+    return api.delete(`/payments/methods/${methodId}`);
+  },
+
+  /**
+   * Load Paystack script dynamically
+   */
+  loadPaystackScript: () => {
+    return new Promise((resolve, reject) => {
+      if (window.PaystackPop) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://js.paystack.co/v1/inline.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Paystack script'));
+      document.head.appendChild(script);
+    });
+  },
+
+  /**
+   * Load Flutterwave script dynamically
+   */
+  loadFlutterwaveScript: () => {
     return new Promise((resolve, reject) => {
       if (window.FlutterwaveCheckout) {
-        window.FlutterwaveCheckout({
-          public_key: process.env.REACT_APP_FLUTTERWAVE_PUBLIC_KEY,
-          tx_ref: reference,
-          amount,
-          currency: 'NGN',
-          payment_options: 'card, banktransfer, ussd',
-          customer: {
-            email,
-          },
-          customizations: {
-            title: 'YabaTech BookStore',
-            description: 'Payment for books',
-            logo: '/logo.png',
-          },
-          callback: (response) => resolve(response),
-          onclose: () => reject(new Error('Payment closed')),
-        });
-      } else {
-        reject(new Error('Flutterwave not loaded'));
+        resolve();
+        return;
       }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.flutterwave.com/v3.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Flutterwave script'));
+      document.head.appendChild(script);
     });
+  },
+
+  /**
+   * Initialize and open Paystack payment dialog
+   * Should be called after backend initializes payment
+   */
+  initializePaystack: (authorizationUrl) => {
+    return new Promise((resolve, reject) => {
+      if (!authorizationUrl) {
+        reject(new Error('Authorization URL is required'));
+        return;
+      }
+
+      // Redirect to Paystack authorization URL
+      // Paystack will handle the payment and redirect back
+      window.location.href = authorizationUrl;
+      resolve();
+    });
+  },
+
+  /**
+   * Initialize and open Flutterwave payment dialog
+   * Should be called after backend initializes payment
+   */
+  initializeFlutterwave: (authorizationUrl) => {
+    return new Promise((resolve, reject) => {
+      if (!authorizationUrl) {
+        reject(new Error('Authorization URL is required'));
+        return;
+      }
+
+      // Redirect to Flutterwave authorization URL
+      window.location.href = authorizationUrl;
+      resolve();
+    });
+  },
+
+  /**
+   * Get payment gateway availability status
+   */
+  checkPaymentGateway: () => {
+    return api.get('/payments/status').catch(() => {
+      // If endpoint doesn't exist, assume defaults
+      return {
+        data: {
+          paystack: !!process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+          flutterwave: !!process.env.REACT_APP_FLUTTERWAVE_PUBLIC_KEY
+        }
+      };
+    });
+  },
+
+  /**
+   * Format amount in Naira for display
+   */
+  formatAmount: (amount) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN'
+    }).format(amount);
   }
 };

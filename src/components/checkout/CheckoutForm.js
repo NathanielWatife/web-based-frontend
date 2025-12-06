@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
+import { paymentService } from '../../services/paymentService';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/CheckoutForm.css';
@@ -10,7 +10,6 @@ import { toast } from 'react-hot-toast';
 
 const CheckoutForm = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -45,21 +44,37 @@ const CheckoutForm = () => {
         totalAmount: getCartTotal(),
         deliveryOption: formData.deliveryOption,
         deliveryAddress: formData.deliveryOption === 'delivery' ? formData.deliveryAddress : undefined,
-        notes: formData.notes
+        notes: formData.notes,
+        paymentMethod: formData.paymentMethod
       };
 
-      const response = await orderService.createOrder(orderData);
+      // Create order first
+      const orderResponse = await orderService.createOrder(orderData);
+      const orderId = orderResponse.data._id;
       
-      // Clear cart and redirect to order confirmation
-      clearCart();
-      toast.success('Order placed successfully!');
-      navigate(`/orders/${response.data._id}`, { 
-        state: { message: 'Order placed successfully!' }
+      // Initialize payment with backend
+      const paymentResponse = await paymentService.initializePayment({
+        orderId: orderId,
+        paymentMethod: formData.paymentMethod
       });
+
+      if (paymentResponse.data && paymentResponse.data.authorizationUrl) {
+        // Clear cart before redirecting to payment gateway
+        clearCart();
+        
+        // Store order ID in sessionStorage for verification after redirect
+        sessionStorage.setItem('paymentOrderId', orderId);
+        
+        // Redirect to payment gateway
+        window.location.href = paymentResponse.data.authorizationUrl;
+      } else {
+        throw new Error('Payment initialization failed');
+      }
       
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to place order');
-      toast.error(error.response?.data?.message || 'Failed to place order');
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsProcessing(false);
     }

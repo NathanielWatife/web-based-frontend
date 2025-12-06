@@ -10,7 +10,8 @@ const AdminDashboard = () => {
     totalBooks: 0,
     totalOrders: 0,
     totalRevenue: 0,
-    pendingOrders: 0
+    pendingOrders: 0,
+    unverifiedPayments: 0
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,10 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
+    
+    // Set up polling for real-time updates every 8 seconds
+    const interval = setInterval(loadDashboardData, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadDashboardData = async () => {
@@ -27,11 +32,17 @@ const AdminDashboard = () => {
       const s = data.stats || {};
       const recent = Array.isArray(data.recentOrders) ? data.recentOrders : [];
 
+      // Count orders with successful payment but pending status (unverified)
+      const unverified = recent.filter(
+        order => order.paymentStatus === 'successful' && order.status === 'pending'
+      ).length;
+
       setStats({
         totalBooks: s.totalBooks || 0,
         totalOrders: s.totalOrders || 0,
         totalRevenue: s.totalRevenue || 0,
         pendingOrders: s.pendingOrders || 0,
+        unverifiedPayments: unverified
       });
 
       setRecentOrders(recent);
@@ -90,6 +101,16 @@ const AdminDashboard = () => {
             <p>Pending Orders</p>
           </div>
         </div>
+
+        {stats.unverifiedPayments > 0 && (
+          <div className="stat-card alert">
+            <div className="stat-icon">✅</div>
+            <div className="stat-info">
+              <h3>{stats.unverifiedPayments}</h3>
+              <p>Auto-Verified Payments</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recent Orders */}
@@ -106,6 +127,7 @@ const AdminDashboard = () => {
                 <div>Order ID</div>
                 <div>Customer</div>
                 <div>Amount</div>
+                <div>Payment</div>
                 <div>Status</div>
                 <div>Date</div>
               </div>
@@ -116,6 +138,18 @@ const AdminDashboard = () => {
                     {order.user?.firstName} {order.user?.lastName}
                   </div>
                   <div className="amount">{formatCurrency(order.totalAmount)}</div>
+                  <div className="payment-status">
+                    <span 
+                      className="status-badge payment"
+                      style={{ 
+                        backgroundColor: 
+                          order.paymentStatus === 'successful' ? '#10b981' :
+                          order.paymentStatus === 'failed' ? '#ef4444' : '#9ca3af'
+                      }}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </div>
                   <div className="status">
                     <span 
                       className="status-badge"

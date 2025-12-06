@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
+import { paymentService } from '../services/paymentService';
 import OrderSummary from '../components/orders/OrderSummary';
 import OrderTracking from '../components/orders/OrderTracking';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -16,10 +17,46 @@ const OrderDetails = () => {
   const location = useLocation();
   const prevStatus = useRef(null);
 
+  const verifyPayment = async (reference) => {
+    try {
+      const response = await paymentService.verifyPayment(reference);
+      if (response.data && response.data.order) {
+        setOrder(response.data.order);
+        toast.success('Payment verified successfully!');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      // Continue loading order normally even if verification fails
+    }
+  };
+
+  const loadOrder = async () => {
+    try {
+      const response = await orderService.getOrder(id);
+      setOrder(response.data);
+    } catch (error) {
+      setError('Failed to load order details');
+      console.error('Error loading order:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated && id) {
       loadOrder();
+      
+      // Check if returning from payment gateway
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get('reference');
+      
+      if (reference) {
+        verifyPayment(reference);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, id]);
 
   // Lightweight polling to detect status changes and trigger toasts
@@ -38,21 +75,9 @@ const OrderDetails = () => {
       } catch (e) {
         // silent on polling errors
       }
-    }, 15000);
+    }, 10000); // Poll every 10 seconds for faster updates
     return () => clearInterval(interval);
   }, [isAuthenticated, id]);
-
-  const loadOrder = async () => {
-    try {
-      const response = await orderService.getOrder(id);
-      setOrder(response.data);
-    } catch (error) {
-      setError('Failed to load order details');
-      console.error('Error loading order:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (location.state && location.state.message) {
@@ -71,7 +96,8 @@ const OrderDetails = () => {
       }
       prevStatus.current = order.status;
     }
-  }, [order?.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
 
   if (!isAuthenticated) {
     return (

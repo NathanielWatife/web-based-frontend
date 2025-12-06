@@ -9,6 +9,7 @@ const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
 
   const loadOrders = useCallback(async () => {
     try {
@@ -25,6 +26,10 @@ const OrderManagement = () => {
 
   useEffect(() => {
     loadOrders();
+    
+    // Poll for order updates every 6 seconds
+    const interval = setInterval(loadOrders, 6000);
+    return () => clearInterval(interval);
   }, [loadOrders]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -36,9 +41,16 @@ const OrderManagement = () => {
     }
   };
 
-  const filteredOrders = filter === 'all' 
+  let filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(order => order.status === filter);
+
+  // Apply payment filter
+  if (paymentFilter === 'verified') {
+    filteredOrders = filteredOrders.filter(order => order.paymentStatus === 'successful');
+  } else if (paymentFilter === 'unverified') {
+    filteredOrders = filteredOrders.filter(order => order.paymentStatus !== 'successful');
+  }
 
   if (loading) {
     return <LoadingSpinner size="large" />;
@@ -62,6 +74,16 @@ const OrderManagement = () => {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
+          
+          <select 
+            value={paymentFilter} 
+            onChange={(e) => setPaymentFilter(e.target.value)}
+            className="form-select"
+          >
+            <option value="all">All Payment Status</option>
+            <option value="verified">Payment Verified ✓</option>
+            <option value="unverified">Payment Pending</option>
+          </select>
         </div>
       </div>
 
@@ -71,7 +93,8 @@ const OrderManagement = () => {
           <div>Customer</div>
           <div>Items</div>
           <div>Amount</div>
-          <div>Status</div>
+          <div>Payment</div>
+          <div>Order Status</div>
           <div>Date</div>
           <div>Actions</div>
         </div>
@@ -95,6 +118,18 @@ const OrderManagement = () => {
               )}
             </div>
             <div className="amount">{formatCurrency(order.totalAmount)}</div>
+            <div className="payment-status">
+              <span 
+                className="status-badge"
+                style={{ 
+                  backgroundColor: 
+                    order.paymentStatus === 'successful' ? '#10b981' :
+                    order.paymentStatus === 'failed' ? '#ef4444' : '#9ca3af'
+                }}
+              >
+                {order.paymentStatus === 'successful' ? '✓ Verified' : order.paymentStatus}
+              </span>
+            </div>
             <div className="status">
               <select
                 value={order.status}
