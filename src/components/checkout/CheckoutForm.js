@@ -58,7 +58,7 @@ const CheckoutForm = () => {
         paymentMethod: formData.paymentMethod
       });
 
-      if (paymentResponse.data && paymentResponse.data.authorizationUrl) {
+      if (paymentResponse.data?.data?.authorizationUrl) {
         // Clear cart before redirecting to payment gateway
         clearCart();
         
@@ -66,7 +66,7 @@ const CheckoutForm = () => {
         sessionStorage.setItem('paymentOrderId', orderId);
         
         // Redirect to payment gateway
-        window.location.href = paymentResponse.data.authorizationUrl;
+        window.location.href = paymentResponse.data.data.authorizationUrl;
       } else {
         throw new Error('Payment initialization failed');
       }
