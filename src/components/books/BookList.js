@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { bookService } from '../../services/bookService';
 import BookCard from './BookCard';
-import LoadingSpinner from '../common/LoadingSpinner';
 import BookCardSkeleton from './BookCardSkeleton';
 import '../../styles/BookList.css';
 import RecommendedBooks from './RecommendedBooks';
@@ -23,6 +22,7 @@ const BookList = () => {
 
   useEffect(() => {
     loadBooks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const loadBooks = async () => {

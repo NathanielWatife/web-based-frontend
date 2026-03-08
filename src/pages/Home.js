@@ -5,7 +5,7 @@ import RecommendedBooks from '../components/books/RecommendedBooks';
 import '../styles/Home.css';
 
 const Home = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="home">

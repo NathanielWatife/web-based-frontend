@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supportService } from '../../services/supportService';
 import '../../styles/AdminManagement.css';
 
@@ -8,7 +7,6 @@ const SupportTickets = () => {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
-  const navigate = useNavigate();
 
   const load = async () => {
     setLoading(true);

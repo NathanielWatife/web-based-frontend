@@ -108,7 +108,7 @@ const EmailVerification = () => {
       }, 100);
       return () => clearTimeout(t);
     }
-  }, [verificationCode, loading]);
+  }, [verificationCode, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Paste handler to fill all boxes if user pastes a 6-digit code
   const handlePaste = (index, e) => {
