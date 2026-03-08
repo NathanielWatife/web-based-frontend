@@ -50,7 +50,7 @@ const CheckoutForm = () => {
 
       // Create order first
       const orderResponse = await orderService.createOrder(orderData);
-      const orderId = orderResponse.data._id;
+      const orderId = orderResponse.data.data._id;
       
       // Initialize payment with backend
       const paymentResponse = await paymentService.initializePayment({
