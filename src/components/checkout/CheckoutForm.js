@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../services/orderService';
-import { paymentService } from '../../services/paymentService';
 import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../common/LoadingSpinner';
 import '../../styles/CheckoutForm.css';
@@ -48,31 +47,17 @@ const CheckoutForm = () => {
         paymentMethod: formData.paymentMethod
       };
 
-      // Create order first
+      // Create order
       const orderResponse = await orderService.createOrder(orderData);
       const orderId = orderResponse.data.data._id;
-      
-      // Initialize payment with backend
-      const paymentResponse = await paymentService.initializePayment({
-        orderId: orderId,
-        paymentMethod: formData.paymentMethod
-      });
 
-      if (paymentResponse.data?.data?.authorizationUrl) {
-        // Clear cart before redirecting to payment gateway
-        clearCart();
-        
-        // Store order ID in sessionStorage for verification after redirect
-        sessionStorage.setItem('paymentOrderId', orderId);
-        
-        // Redirect to payment gateway
-        window.location.href = paymentResponse.data.data.authorizationUrl;
-      } else {
-        throw new Error('Payment initialization failed');
-      }
+      // Clear cart and show success
+      clearCart();
+      toast.success('Your order has been placed! Please check your mail.');
+      navigate(`/orders/${orderId}`);
       
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Failed to process payment';
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to place order';
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
